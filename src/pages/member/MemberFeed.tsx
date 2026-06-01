@@ -249,11 +249,12 @@ export default function MemberFeed() {
       const uid = userId || userIdRef.current;
       if (!uid) return;
 
-      // Load member + association posts
+      // Load member posts only. Association/company posts stay on their own
+      // pages and must never appear in a user's personal timeline.
       const { data: postsData, error } = await supabase
         .from('posts')
         .select('*')
-        .or('post_context.is.null,post_context.eq.member,post_context.eq.association')
+        .or('post_context.is.null,post_context.eq.member')
         .order('created_at', { ascending: false })
         .limit(50);
 
@@ -270,18 +271,9 @@ export default function MemberFeed() {
       const allUserIds = Array.from(new Set([...userIds, ...originalAuthorIds]));
       const postIds = postsData.map(p => p.id);
 
-      // Collect organization IDs for association posts
-      const orgIds = Array.from(new Set(
-        postsData.filter(p => p.post_context === 'association' && p.organization_id)
-          .map(p => p.organization_id!)
-      ));
-
-      // Parallel fetch: profiles, associations, members, likes (4 independent queries)
-      const [profilesRes, assocRes, membersRes, likesRes] = await Promise.all([
+      // Parallel fetch: profiles, members, likes (3 independent queries)
+      const [profilesRes, membersRes, likesRes] = await Promise.all([
         supabase.from('profiles').select('id, first_name, last_name, avatar, headline').in('id', allUserIds),
-        orgIds.length > 0
-          ? supabase.from('associations').select('id, name, logo').in('id', orgIds)
-          : Promise.resolve({ data: [] as any[] }),
         supabase.from('members').select('user_id, company:companies(name)').in('user_id', userIds).eq('is_active', true),
         supabase.from('post_likes').select('post_id').eq('user_id', uid).in('post_id', postIds),
       ]);
@@ -290,11 +282,6 @@ export default function MemberFeed() {
         acc[profile.id] = profile;
         return acc;
       }, {} as Record<string, any>);
-
-      const associationsById: Record<string, Association> = (assocRes.data || []).reduce((acc: Record<string, Association>, a: any) => {
-        acc[a.id] = a;
-        return acc;
-      }, {} as Record<string, Association>);
 
       const membersByUserId = (membersRes.data || []).reduce((acc: Record<string, any>, m: any) => {
         if (!acc[m.user_id]) acc[m.user_id] = m;
@@ -311,9 +298,7 @@ export default function MemberFeed() {
           profile: profileData,
           original_author: post.original_author_id ? profilesById[post.original_author_id] : null,
           member: membersByUserId[post.user_id] || null,
-          association: post.post_context === 'association' && post.organization_id
-            ? associationsById[post.organization_id] || null
-            : null,
+          association: null,
           user_liked: likedPostIds.has(post.id),
         };
       });
