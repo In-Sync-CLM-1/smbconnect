@@ -207,7 +207,7 @@ serve(async (req: Request) => {
         const eventDate = formatEventDate(validation.event_date);
         const eventTime = validation.event_time || 'Details to be announced';
         const eventVenue = validation.event_venue || 'Details to be announced';
-        const portalUrl = 'https://smb-connect-hub.lovable.app/auth/login';
+        const portalUrl = 'https://smbconnect.in/auth/login';
 
         try {
           const emailHtml = `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>

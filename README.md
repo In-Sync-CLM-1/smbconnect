@@ -1,73 +1,58 @@
-# Welcome to your Lovable project
+# In-Sync SMB Connect
 
-## Project info
+SMB Connect — association / member engagement and event-registration platform
+for small and medium businesses.
 
-**URL**: https://lovable.dev/projects/c84ed3d7-c285-49b2-863b-a53f17addaac
+## Tech Stack
 
-## How can I edit this code?
+- **Frontend:** Vite + React + TypeScript + Tailwind CSS + shadcn-ui
+- **Backend:** Supabase (PostgreSQL + Edge Functions + Auth + Storage)
+- **Hosting:** Cloudflare Pages (`smb-sync` → `smbconnect.in`)
+- **Scheduled jobs:** Cloudflare Workers (`cron-worker/`)
 
-There are several ways of editing your application.
-
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/c84ed3d7-c285-49b2-863b-a53f17addaac) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
+## Local Development
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+npm install
+npm run dev          # http://localhost:8080
+npm run build        # outputs to dist/
+npm run lint
 ```
 
-**Edit a file directly in GitHub**
+`.env` (gitignored) must contain at minimum:
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+```env
+VITE_SUPABASE_URL=https://zcmfxpknsybponbudyqb.supabase.co
+VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
+VITE_SUPABASE_PROJECT_ID=zcmfxpknsybponbudyqb
+```
 
-**Use GitHub Codespaces**
+Only values prefixed `VITE_` are inlined into the browser bundle. Anything that
+grants write access (service role key, `sbp_` token, Cloudflare API token) must
+NOT be prefixed `VITE_`.
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## Deploy — `git push origin main` (the only deploy path)
 
-## What technologies are used for this project?
+Everything ships from a single `git push origin main`. There are no manual
+`wrangler` or `supabase` CLI steps. Three GitHub Actions workflows fan out by
+which paths changed:
 
-This project is built with:
+| Workflow | Fires when you change | What it does |
+| --- | --- | --- |
+| `pages-deploy.yml` | anything except `supabase/**`, `cron-worker/**`, `*.md` | build + deploy frontend to Cloudflare Pages `smb-sync` |
+| `supabase-deploy.yml` | `supabase/**` | `supabase db push`, then deploy **only the changed** edge functions |
+| `cron-worker-deploy.yml` | `cron-worker/**` | redeploy each Cloudflare cron Worker from `cron-worker/jobs.txt` |
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+Required GitHub Actions secrets: `VITE_SUPABASE_URL`, `VITE_SUPABASE_PROJECT_ID`,
+`VITE_SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD`,
+`SUPABASE_SERVICE_ROLE_KEY`, `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`.
 
-## How can I deploy this project?
+## Custom Domain
 
-Simply open [Lovable](https://lovable.dev/projects/c84ed3d7-c285-49b2-863b-a53f17addaac) and click on Share -> Publish.
+Production: `https://smbconnect.in` — a proxied CNAME on the Cloudflare zone
+points at `smb-sync.pages.dev`.
 
-## Can I connect a custom domain to my Lovable project?
+## Rollback
 
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+Use the Cloudflare Pages dashboard to roll back `smb-sync` to a previous
+deployment.

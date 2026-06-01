@@ -85,7 +85,7 @@ serve(async (req) => {
         type: 'recovery',
         email: (await supabaseAdmin.auth.admin.getUserById(userId)).data.user?.email!,
         options: {
-          redirectTo: `${Deno.env.get('VITE_SUPABASE_URL')?.replace('supabase.co', 'lovable.app') || 'https://smb-connect-hub.lovable.app'}/reset-password`
+          redirectTo: 'https://smbconnect.in/reset-password'
         }
       });
 
