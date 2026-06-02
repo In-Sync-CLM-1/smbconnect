@@ -435,6 +435,7 @@ export type Database = {
           business_type: string | null
           city: string | null
           country: string | null
+          cover_image: string | null
           created_at: string | null
           created_by: string | null
           description: string | null
@@ -465,6 +466,7 @@ export type Database = {
           business_type?: string | null
           city?: string | null
           country?: string | null
+          cover_image?: string | null
           created_at?: string | null
           created_by?: string | null
           description?: string | null
@@ -495,6 +497,7 @@ export type Database = {
           business_type?: string | null
           city?: string | null
           country?: string | null
+          cover_image?: string | null
           created_at?: string | null
           created_by?: string | null
           description?: string | null

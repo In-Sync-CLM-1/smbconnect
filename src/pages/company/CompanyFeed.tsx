@@ -4,9 +4,11 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { BannerImage } from '@/components/ui/banner-image';
+import { EditCompanyProfileDialog } from '@/components/company/EditCompanyProfileDialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Heart, MessageCircle, Trash2, Image as ImageIcon, Video, X, ArrowLeft, Search, Repeat2, MessageSquare, Users, Calendar, Building2, Settings, LogOut, UserPlus, Bell, Send, FileText } from 'lucide-react';
+import { Heart, MessageCircle, Trash2, Image as ImageIcon, Video, X, ArrowLeft, Search, Repeat2, MessageSquare, Users, Calendar, Building2, Settings, LogOut, UserPlus, Bell, Send, FileText, Pencil } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { formatDistanceToNow } from 'date-fns';
 import { CommentsSection } from '@/components/member/CommentsSection';
@@ -66,6 +68,7 @@ interface CompanyInfo {
   id: string;
   name: string;
   logo: string | null;
+  cover_image: string | null;
   description: string | null;
   industry_type: string | null;
   city: string | null;
@@ -73,6 +76,7 @@ interface CompanyInfo {
   country: string | null;
   employee_count: number | null;
   member_count?: number;
+  [key: string]: any;
 }
 
 export default function CompanyFeed() {
@@ -91,6 +95,7 @@ export default function CompanyFeed() {
   const [searchQuery, setSearchQuery] = useState('');
   const [profile, setProfile] = useState<any>(null);
   const [companyInfo, setCompanyInfo] = useState<CompanyInfo | null>(null);
+  const [showEditProfile, setShowEditProfile] = useState(false);
   const [pendingConnectionsCount, setPendingConnectionsCount] = useState(0);
   const [activeTab, setActiveTab] = useState<'posts' | 'about' | 'members'>('posts');
   const [contentFilter, setContentFilter] = useState<'all' | 'images' | 'videos'>('all');
@@ -218,6 +223,14 @@ export default function CompanyFeed() {
       console.error('Error loading company info:', error);
       return null;
     }
+  };
+
+  // Re-resolve and refresh the company info card (used after an edit save).
+  const loadCompanyInfo = async () => {
+    const uid = userIdRef.current || currentUserId;
+    if (!uid) return;
+    const info = await resolveCompanyInfo(uid);
+    if (info) setCompanyInfo(info as CompanyInfo);
   };
 
   const loadPendingConnectionsCount = async (userId?: string) => {
@@ -762,20 +775,48 @@ export default function CompanyFeed() {
           {companyInfo && (
             <Card className="mb-6 overflow-hidden">
               {/* Cover Banner */}
-              <div className="h-32 md:h-40 bg-gradient-to-r from-primary/20 via-primary/30 to-primary/20 relative">
-                <div className="absolute inset-0 bg-[url('/placeholder.svg')] opacity-10 bg-cover bg-center" />
+              <div className="h-[128px] md:h-[200px] relative group overflow-hidden">
+                {companyInfo.cover_image ? (
+                  <BannerImage src={companyInfo.cover_image} alt="Cover" />
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-r from-primary/20 via-primary/30 to-primary/20">
+                    <div className="absolute inset-0 bg-[url('/placeholder.svg')] opacity-10 bg-cover bg-center" />
+                  </div>
+                )}
+                {/* Edit Button on Cover */}
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity"
+                  onClick={() => setShowEditProfile(true)}
+                >
+                  <Pencil className="w-4 h-4 mr-2" />
+                  Edit Profile
+                </Button>
               </div>
-              
-              {/* Logo and Info */}
-              <div className="px-6 pb-6">
-                <div className="flex flex-col md:flex-row md:items-end gap-4 -mt-12 md:-mt-16">
-                  <Avatar className="w-24 h-24 md:w-32 md:h-32 border-4 border-background shadow-lg">
-                    <AvatarImage src={companyInfo.logo || undefined} />
-                    <AvatarFallback className="text-2xl md:text-3xl bg-primary text-primary-foreground">
-                      {companyInfo.name?.[0]}
-                    </AvatarFallback>
-                  </Avatar>
-                  
+
+              {/* Logo and Info Section */}
+              <div className="relative px-6 pb-6 pt-4">
+                {/* Avatar positioned to overlap banner */}
+                <div className="absolute -top-12 md:-top-16 left-6">
+                  <div className="relative group/avatar">
+                    <Avatar className="w-24 h-24 md:w-32 md:h-32 border-4 border-background shadow-lg">
+                      <AvatarImage src={companyInfo.logo || undefined} />
+                      <AvatarFallback className="text-2xl md:text-3xl bg-primary text-primary-foreground">
+                        {companyInfo.name?.[0]}
+                      </AvatarFallback>
+                    </Avatar>
+                    <button
+                      onClick={() => setShowEditProfile(true)}
+                      className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 group-hover/avatar:opacity-100 transition-opacity"
+                    >
+                      <Pencil className="w-5 h-5 text-white" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Info Section - to the right of avatar on desktop, below on mobile */}
+                <div className="flex flex-col md:flex-row md:items-start gap-4 pt-14 md:pt-0 md:pl-36 lg:pl-40">
                   <div className="flex-1">
                     <h1 className="text-2xl md:text-3xl font-bold">{companyInfo.name}</h1>
                     <p className="text-muted-foreground">{companyInfo.industry_type || 'Company'}</p>
@@ -789,7 +830,7 @@ export default function CompanyFeed() {
                       <span>{companyInfo.member_count || 0} members</span>
                     </div>
                   </div>
-                  
+
                   {/* Action Buttons */}
                   <div className="flex gap-3 mt-4 md:mt-0">
                     <Button size="sm" onClick={() => navigate('/messages')}>
@@ -803,6 +844,16 @@ export default function CompanyFeed() {
                 </div>
               </div>
             </Card>
+          )}
+
+          {/* Edit Profile Dialog */}
+          {companyInfo && (
+            <EditCompanyProfileDialog
+              company={companyInfo}
+              open={showEditProfile}
+              onOpenChange={setShowEditProfile}
+              onSuccess={loadCompanyInfo}
+            />
           )}
 
           {/* Tab Navigation */}
