@@ -966,7 +966,7 @@ export default function MemberFeed() {
                   size="sm"
                   onClick={() => fileInputRef.current?.click()}
                   className="text-muted-foreground hover:text-foreground hover:bg-transparent"
-                  title="Add photo (max 10MB)"
+                  title="Add photo (max 8MB)"
                 >
                   <ImageIcon className="w-5 h-5 mr-2" />
                   Photo
@@ -986,7 +986,7 @@ export default function MemberFeed() {
                   size="sm"
                   onClick={() => documentInputRef.current?.click()}
                   className="text-muted-foreground hover:text-foreground hover:bg-transparent"
-                  title="Add document (max 10MB, PDF/DOC/DOCX)"
+                  title="Add document (max 100MB, PDF/DOC/DOCX)"
                 >
                   <FileText className="w-5 h-5 mr-2" />
                   Document

@@ -968,7 +968,7 @@ export default function CompanyFeed() {
                         ref={fileInputRef}
                       />
                       <label htmlFor="image-upload">
-                        <Button variant="outline" size="sm" type="button" asChild title="Add photo (max 10MB)">
+                        <Button variant="outline" size="sm" type="button" asChild title="Add photo (max 8MB)">
                           <span className="cursor-pointer">
                             <ImageIcon className="w-4 h-4 mr-2" />
                             Photo
@@ -1000,7 +1000,7 @@ export default function CompanyFeed() {
                         ref={documentInputRef}
                       />
                       <label htmlFor="document-upload">
-                        <Button variant="outline" size="sm" type="button" asChild title="Add document (max 10MB, PDF/DOC/DOCX)">
+                        <Button variant="outline" size="sm" type="button" asChild title="Add document (max 100MB, PDF/DOC/DOCX)">
                           <span className="cursor-pointer">
                             <FileText className="w-4 h-4 mr-2" />
                             Document
