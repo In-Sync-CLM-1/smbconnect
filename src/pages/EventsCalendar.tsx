@@ -598,7 +598,7 @@ export default function EventsCalendar() {
             {/* Thumbnail Upload */}
             <div className="space-y-2">
               <Label>Event Thumbnail</Label>
-              <p className="text-xs text-muted-foreground">Upload a custom thumbnail (max 10MB). If not uploaded, the link preview image will be used.</p>
+              <p className="text-xs text-muted-foreground">Upload a custom thumbnail (max 8MB). If not uploaded, the link preview image will be used.</p>
               
               <input
                 ref={thumbnailInputRef}
