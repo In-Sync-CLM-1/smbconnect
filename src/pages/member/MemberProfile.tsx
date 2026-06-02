@@ -296,11 +296,14 @@ export default function MemberProfile() {
       const { data: { session } } = await supabase.auth.getSession();
       const user = session?.user;
       
-      // Load posts by this user
+      // Load posts by this user. Only personal (member) posts belong on the
+      // profile timeline — posts authored from an association/company page are
+      // scoped to that page and must never surface on the user's own timeline.
       const { data: postsData, error } = await supabase
         .from('posts')
         .select('*')
         .eq('user_id', targetUserId)
+        .or('post_context.is.null,post_context.eq.member')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
