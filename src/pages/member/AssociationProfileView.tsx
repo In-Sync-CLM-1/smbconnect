@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { BannerImage } from "@/components/ui/banner-image";
 import { BackButton } from "@/components/BackButton";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -409,7 +410,7 @@ export default function AssociationProfileView() {
           {/* Cover Banner */}
           <div className="h-[128px] md:h-[200px] relative overflow-hidden">
             {association.cover_image ? (
-              <img src={association.cover_image} alt="Cover" className="w-full h-full object-cover" />
+              <BannerImage src={association.cover_image} alt="Cover" />
             ) : (
               <div className="w-full h-full bg-gradient-to-r from-primary/20 via-primary/30 to-primary/20" />
             )}

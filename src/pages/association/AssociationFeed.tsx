@@ -5,6 +5,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { BannerImage } from '@/components/ui/banner-image';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Heart, MessageCircle, Trash2, Image as ImageIcon, Video, X, ArrowLeft, Search, Repeat2, MessageSquare, Users, Calendar, Building2, Settings, LogOut, UserPlus, Bell, Send, Pencil, FileText } from 'lucide-react';
 import { EditAssociationProfileDialog } from '@/components/association/EditAssociationProfileDialog';
@@ -901,11 +902,7 @@ export default function AssociationFeed() {
               {/* Cover Banner */}
               <div className="h-[128px] md:h-[200px] relative group overflow-hidden">
                 {associationInfo.cover_image ? (
-                  <img 
-                    src={associationInfo.cover_image} 
-                    alt="Cover" 
-                    className="w-full h-full object-cover"
-                  />
+                  <BannerImage src={associationInfo.cover_image} alt="Cover" />
                 ) : (
                   <div className="w-full h-full bg-gradient-to-r from-primary/20 via-primary/30 to-primary/20">
                     <div className="absolute inset-0 bg-[url('/placeholder.svg')] opacity-10 bg-cover bg-center" />

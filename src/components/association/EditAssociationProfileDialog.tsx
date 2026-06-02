@@ -12,6 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { BannerImage } from '@/components/ui/banner-image';
 import { Camera, Image as ImageIcon, X } from 'lucide-react';
 
 const profileSchema = z.object({
@@ -333,13 +334,13 @@ export function EditAssociationProfileDialog({
               {/* Cover Image Upload */}
               <div className="space-y-2">
                 <Label>Cover Image</Label>
-                <p className="text-xs text-muted-foreground mb-2">Recommended: 1200 x 300 pixels (4:1 ratio)</p>
+                <p className="text-xs text-muted-foreground mb-2">Any image works — the full banner is always shown. For the sharpest result, use a wide image around 1200 x 300 pixels.</p>
                 <div 
                   className="relative h-32 bg-gradient-to-r from-primary/20 via-primary/30 to-primary/20 rounded-lg overflow-hidden group cursor-pointer border-2 border-dashed border-muted-foreground/30 hover:border-primary/50 transition-colors"
                   onClick={() => coverInputRef.current?.click()}
                 >
                   {coverPreview ? (
-                    <img src={coverPreview} alt="Cover" className="w-full h-full object-cover" />
+                    <BannerImage src={coverPreview} alt="Cover" />
                   ) : (
                     <div className="flex items-center justify-center h-full">
                       <div className="text-center text-muted-foreground">

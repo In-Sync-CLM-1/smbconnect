@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useProfile } from '@/hooks/useProfile';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { BannerImage } from '@/components/ui/banner-image';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
@@ -1069,11 +1070,7 @@ export default function MemberProfile() {
             {/* Cover Image */}
             <div className="h-[128px] md:h-[200px] bg-gradient-to-r from-primary/20 to-primary/10 relative">
               {profile.cover_image && (
-                <img
-                  src={profile.cover_image}
-                  alt="Cover"
-                  className="w-full h-full object-cover"
-                />
+                <BannerImage src={profile.cover_image} alt="Cover" />
               )}
               {isOwnProfile && (
                 <label className="absolute top-4 right-4 cursor-pointer">
