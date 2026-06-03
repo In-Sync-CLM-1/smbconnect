@@ -13,6 +13,8 @@ import { Separator } from '@/components/ui/separator';
 import { Mail, Lock, User, Phone } from 'lucide-react';
 import logo from '@/assets/smb-connect-logo.jpg';
 import { PolicyFooterLinks } from '@/components/PolicyLayout';
+import { DpdpConsent } from '@/components/dpdp/DpdpConsent';
+import { CONSENT_PURPOSE, recordConsent } from '@/lib/dpdp';
 
 const registerSchema = z.object({
   firstName: z.string().min(2, 'First name must be at least 2 characters'),
@@ -30,6 +32,7 @@ type RegisterFormData = z.infer<typeof registerSchema>;
 
 export default function Register() {
   const [loading, setLoading] = useState(false);
+  const [consented, setConsented] = useState(false);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
@@ -64,6 +67,9 @@ export default function Register() {
       });
 
       if (error) throw error;
+
+      // DPDP: store proof of the consent the user just gave (best-effort).
+      await recordConsent(normalizedEmail, CONSENT_PURPOSE.registration);
 
       if (!signUpData.session) {
         toast({
@@ -213,7 +219,13 @@ export default function Register() {
               )}
             </div>
 
-            <Button type="submit" className="w-full" disabled={loading}>
+            <DpdpConsent
+              consented={consented}
+              onConsentChange={setConsented}
+              disabled={loading}
+            />
+
+            <Button type="submit" className="w-full" disabled={loading || !consented}>
               {loading ? 'Creating account...' : 'Create Account'}
             </Button>
           </form>
@@ -230,7 +242,7 @@ export default function Register() {
             variant="outline"
             className="w-full"
             onClick={handleGoogleSignUp}
-            disabled={loading}
+            disabled={loading || !consented}
           >
             <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
               <path

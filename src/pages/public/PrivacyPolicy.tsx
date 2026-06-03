@@ -1,13 +1,17 @@
 import { PolicyLayout } from "@/components/PolicyLayout";
+import { GRIEVANCE_EMAIL } from "@/lib/dpdp";
 
 export default function PrivacyPolicy() {
   return (
-    <PolicyLayout title="Privacy Policy" lastUpdated="April 21, 2026">
+    <PolicyLayout title="Privacy Policy" lastUpdated="June 3, 2026">
       <p>
         SMB Connect ("we", "us", "our") values your privacy. This Privacy Policy explains what
         information we collect through the Platform at smbconnect.in, how we use it, with
-        whom we share it, and the choices available to you. By using the Platform you consent
-        to the practices described here.
+        whom we share it, and the choices available to you. It is published in accordance with
+        India's Digital Personal Data Protection Act, 2023 (the "DPDP Act"). For the personal
+        data you provide, SMB Connect acts as the <strong>Data Fiduciary</strong> and you are
+        the <strong>Data Principal</strong>. We process your personal data on the basis of the
+        consent you give us, for the lawful purposes described below.
       </p>
 
       <h2>1. Information We Collect</h2>
@@ -84,47 +88,74 @@ export default function PrivacyPolicy() {
         You may request deletion of your account, subject to legal retention requirements.
       </p>
 
-      <h2>7. Your Rights</h2>
-      <p>Subject to applicable law, you have the right to:</p>
+      <h2>7. Your Rights as a Data Principal</h2>
+      <p>Under the DPDP Act, and subject to applicable law, you have the right to:</p>
       <ul>
-        <li>Access the personal data we hold about you.</li>
-        <li>Request correction of inaccurate information.</li>
-        <li>Request deletion or restriction of processing.</li>
-        <li>Withdraw consent where processing is based on consent.</li>
-        <li>Object to processing in certain circumstances.</li>
-        <li>Lodge a complaint with the relevant data protection authority.</li>
+        <li><strong>Access:</strong> obtain a summary of the personal data we process about you.</li>
+        <li><strong>Correction:</strong> request correction of inaccurate or incomplete data.</li>
+        <li><strong>Erasure:</strong> request deletion of your personal data, subject to legal retention.</li>
+        <li><strong>Withdraw consent:</strong> withdraw any consent you have given, at any time.</li>
+        <li><strong>Nominate:</strong> nominate another person to exercise your rights in the event of death or incapacity.</li>
+        <li><strong>Grievance redressal:</strong> have your concerns addressed through our grievance process.</li>
       </ul>
       <p>
-        To exercise these rights, email{" "}
-        <a href="mailto:support@smbconnect.in">support@smbconnect.in</a> from your registered
-        email address.
+        The easiest way to exercise these rights is from within your account, under{" "}
+        <strong>Account Settings → Privacy &amp; My Data</strong>, where you can raise a request
+        and track its status. You may also email our Grievance Officer at{" "}
+        <a href={`mailto:${GRIEVANCE_EMAIL}`}>{GRIEVANCE_EMAIL}</a> from your registered email
+        address. We aim to action requests within 30 days.
       </p>
 
-      <h2>8. Children's Privacy</h2>
+      <h2>8. Consent &amp; Its Withdrawal</h2>
+      <p>
+        Where we rely on your consent, we obtain it through a clear affirmative action at the
+        point of collection (for example, the consent notice shown during sign-up), and we keep
+        a record of that consent. You may withdraw your consent at any time; doing so will not
+        affect the lawfulness of processing carried out before withdrawal. Withdrawing consent
+        that is necessary to provide the service may mean we can no longer offer you that service.
+      </p>
+
+      <h2>9. Grievance Officer</h2>
+      <p>
+        In accordance with the DPDP Act, you may contact our Data Protection / Grievance Officer
+        for any questions, requests, or complaints regarding your personal data:
+      </p>
+      <ul>
+        <li><strong>Grievance Officer, SMB Connect</strong></li>
+        <li>Email: <a href={`mailto:${GRIEVANCE_EMAIL}`}>{GRIEVANCE_EMAIL}</a></li>
+      </ul>
+      <p>
+        If your grievance is not resolved to your satisfaction within 90 days, you may make a
+        complaint to the Data Protection Board of India.
+      </p>
+
+      <h2>10. Children's Privacy</h2>
       <p>
         The Platform is not intended for individuals under 18. We do not knowingly collect
         personal data from children. If you believe we have inadvertently collected such
         information, please contact us to have it removed.
       </p>
 
-      <h2>9. International Transfers</h2>
+      <h2>11. International Transfers</h2>
       <p>
         Data may be processed and stored in data centres located outside your country of
         residence. Where required by law, we put appropriate safeguards in place for such
         transfers.
       </p>
 
-      <h2>10. Changes to This Policy</h2>
+      <h2>12. Changes to This Policy</h2>
       <p>
         We may update this Privacy Policy from time to time. Material changes will be posted
         on this page with an updated effective date, and — where appropriate — notified to
         you via email or through the Platform.
       </p>
 
-      <h2>11. Contact Us</h2>
+      <h2>13. Contact Us</h2>
       <p>
-        Questions or requests regarding this Privacy Policy? Write to{" "}
-        <a href="mailto:support@smbconnect.in">support@smbconnect.in</a>.
+        General questions about this Privacy Policy? Write to{" "}
+        <a href="mailto:support@smbconnect.in">support@smbconnect.in</a>. For data-protection
+        requests and grievances, please contact our Grievance Officer at{" "}
+        <a href={`mailto:${GRIEVANCE_EMAIL}`}>{GRIEVANCE_EMAIL}</a>.
       </p>
     </PolicyLayout>
   );

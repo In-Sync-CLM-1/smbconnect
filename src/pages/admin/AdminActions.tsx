@@ -259,6 +259,10 @@ export default function AdminActions() {
                 <Users className="w-4 h-4 mr-2" />
                 Manage Users
               </Button>
+              <Button variant="outline" className="w-full" onClick={() => navigate('/admin/dpdp')}>
+                <Shield className="w-4 h-4 mr-2" />
+                DPDP Compliance
+              </Button>
               <Button variant="outline" className="w-full" onClick={() => navigate('/admin/invitations')}>
                 <UserPlus className="w-4 h-4 mr-2" />
                 Member Invitations

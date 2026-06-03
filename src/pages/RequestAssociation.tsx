@@ -12,6 +12,8 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Building2, CheckCircle, Clock, XCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { DpdpConsent } from '@/components/dpdp/DpdpConsent';
+import { CONSENT_PURPOSE, recordConsent } from '@/lib/dpdp';
 
 const requestSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
@@ -32,6 +34,7 @@ export default function RequestAssociation() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [consented, setConsented] = useState(false);
   const [existingRequests, setExistingRequests] = useState<any[]>([]);
   const [loadingRequests, setLoadingRequests] = useState(true);
 
@@ -93,6 +96,9 @@ export default function RequestAssociation() {
         }]);
 
       if (error) throw error;
+
+      // DPDP: record the consent given for association onboarding (best-effort).
+      await recordConsent(user.email || data.contact_email, CONSENT_PURPOSE.association);
 
       toast({
         title: 'Success',
@@ -240,8 +246,15 @@ export default function RequestAssociation() {
                 </div>
               </div>
 
+              <DpdpConsent
+                consented={consented}
+                onConsentChange={setConsented}
+                disabled={loading}
+                purposeText="creating and managing your association on SMB Connect"
+              />
+
               <div className="flex gap-4">
-                <Button type="submit" disabled={loading}>
+                <Button type="submit" disabled={loading || !consented}>
                   {loading ? 'Submitting...' : 'Submit Request'}
                 </Button>
                 <Button type="button" variant="outline" onClick={() => navigate('/dashboard')}>

@@ -82,6 +82,17 @@ export default function AdminCompanyProfileView() {
       if (companyError) throw companyError;
       setCompany(companyData);
 
+      // DPDP: log access to company PII (GST/PAN) for the purpose-limitation audit trail.
+      if (companyData && (companyData.gst_number || companyData.pan_number)) {
+        supabase.rpc('log_pii_access', {
+          p_table: 'companies',
+          p_column: [companyData.gst_number && 'gst_number', companyData.pan_number && 'pan_number'].filter(Boolean).join(','),
+          p_subject_id: companyData.id,
+          p_subject_label: companyData.name,
+          p_purpose: 'admin_company_profile_view',
+        }).then(({ error }) => { if (error) console.error('log_pii_access failed:', error.message); });
+      }
+
       // Fetch association details
       if (companyData.association_id) {
         const { data: assocData } = await supabase

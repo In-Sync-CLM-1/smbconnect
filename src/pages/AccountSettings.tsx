@@ -4,8 +4,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { ChangePasswordForm } from '@/components/account/ChangePasswordForm';
 import { EditEmailDialog } from '@/components/account/EditEmailDialog';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { BackButton } from '@/components/BackButton';
 import { useAuth } from '@/hooks/useAuth';
+import { ShieldCheck, ChevronRight } from 'lucide-react';
 
 export default function AccountSettings() {
   const navigate = useNavigate();
@@ -88,6 +90,25 @@ export default function AccountSettings() {
           </Card>
 
           <ChangePasswordForm />
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <ShieldCheck className="h-5 w-5 text-primary" />
+                Privacy &amp; My Data
+              </CardTitle>
+              <CardDescription>
+                View your consent history and exercise your data-protection rights under the
+                DPDP Act, 2023 — access, correct, or erase your data, or withdraw consent.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button variant="outline" onClick={() => navigate('/privacy-and-data')}>
+                Manage Privacy &amp; My Data
+                <ChevronRight className="h-4 w-4 ml-1" />
+              </Button>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>

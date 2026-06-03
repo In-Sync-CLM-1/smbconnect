@@ -13,6 +13,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/hooks/use-toast';
 import { Building2, CheckCircle, Clock, XCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { DpdpConsent } from '@/components/dpdp/DpdpConsent';
+import { CONSENT_PURPOSE, recordConsent } from '@/lib/dpdp';
 
 const requestSchema = z.object({
   association_id: z.string().optional(),
@@ -40,6 +42,7 @@ export default function RequestCompany() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [consented, setConsented] = useState(false);
   const [existingRequests, setExistingRequests] = useState<any[]>([]);
   const [loadingRequests, setLoadingRequests] = useState(true);
   const [associations, setAssociations] = useState<any[]>([]);
@@ -129,6 +132,9 @@ export default function RequestCompany() {
         }]);
 
       if (error) throw error;
+
+      // DPDP: record the consent given for company onboarding (best-effort).
+      await recordConsent(user.email || data.email, CONSENT_PURPOSE.company);
 
       toast({
         title: 'Success',
@@ -314,8 +320,15 @@ export default function RequestCompany() {
                 </div>
               </div>
 
+              <DpdpConsent
+                consented={consented}
+                onConsentChange={setConsented}
+                disabled={loading}
+                purposeText="creating and managing your company on SMB Connect"
+              />
+
               <div className="flex gap-4">
-                <Button type="submit" disabled={loading}>
+                <Button type="submit" disabled={loading || !consented}>
                   {loading ? 'Submitting...' : 'Submit Request'}
                 </Button>
                 <Button type="button" variant="outline" onClick={() => navigate('/dashboard')}>

@@ -23,6 +23,7 @@ const RequestAssociation = lazy(() => import("./pages/RequestAssociation"));
 const RequestCompany = lazy(() => import("./pages/RequestCompany"));
 const EventsCalendar = lazy(() => import("./pages/EventsCalendar"));
 const AdminActions = lazy(() => import("./pages/admin/AdminActions"));
+const AdminDpdp = lazy(() => import("./pages/admin/AdminDpdp"));
 const UserManagement = lazy(() => import("./pages/admin/UserManagement"));
 const AdminAssociations = lazy(() => import("./pages/admin/AdminAssociations"));
 const AdminCompanies = lazy(() => import("./pages/admin/AdminCompanies"));
@@ -74,6 +75,7 @@ const CompanyFeed = lazy(() => import("./pages/company/CompanyFeed"));
 const AssociationFeed = lazy(() => import("./pages/association/AssociationFeed"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const AccountSettings = lazy(() => import("./pages/AccountSettings"));
+const PrivacyAndData = lazy(() => import("./pages/member/PrivacyAndData"));
 const EventLandingPages = lazy(() => import("./pages/admin/EventLandingPages"));
 const CreateLandingPage = lazy(() => import("./pages/admin/CreateLandingPage"));
 const EventLandingPageView = lazy(() => import("./pages/public/EventLandingPageView"));
@@ -159,6 +161,7 @@ const AppContent = () => {
               }
             />
             <Route path="/account-settings" element={<ProtectedRoute><AccountSettings /></ProtectedRoute>} />
+            <Route path="/privacy-and-data" element={<ProtectedRoute><PrivacyAndData /></ProtectedRoute>} />
         <Route
           path="/setup"
           element={
@@ -212,6 +215,14 @@ const AppContent = () => {
             element={
               <ProtectedRoute>
                 <UserManagement />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/dpdp"
+            element={
+              <ProtectedRoute>
+                <AdminDpdp />
               </ProtectedRoute>
             }
           />

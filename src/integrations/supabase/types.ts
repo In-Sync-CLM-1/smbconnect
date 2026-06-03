@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "13.0.5"
+    PostgrestVersion: "14.5"
   }
   public: {
     Tables: {
@@ -213,6 +213,11 @@ export type Database = {
           created_at: string | null
           created_by: string | null
           description: string | null
+          email_domain_provisioned_at: string | null
+          email_domain_resend_id: string | null
+          email_domain_status: string
+          email_domain_verified_at: string | null
+          email_subdomain: string | null
           founded_year: number | null
           id: string
           industry: string | null
@@ -236,6 +241,11 @@ export type Database = {
           created_at?: string | null
           created_by?: string | null
           description?: string | null
+          email_domain_provisioned_at?: string | null
+          email_domain_resend_id?: string | null
+          email_domain_status?: string
+          email_domain_verified_at?: string | null
+          email_subdomain?: string | null
           founded_year?: number | null
           id?: string
           industry?: string | null
@@ -259,6 +269,11 @@ export type Database = {
           created_at?: string | null
           created_by?: string | null
           description?: string | null
+          email_domain_provisioned_at?: string | null
+          email_domain_resend_id?: string | null
+          email_domain_status?: string
+          email_domain_verified_at?: string | null
+          email_subdomain?: string | null
           founded_year?: number | null
           id?: string
           industry?: string | null
@@ -310,6 +325,45 @@ export type Database = {
           resource_id?: string | null
           user_agent?: string | null
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      breach_notifications: {
+        Row: {
+          affected_user_ids: string[] | null
+          contact_info: string
+          description: string
+          id: string
+          impact: string
+          remedial_steps: string
+          title: string
+          triggered_at: string
+          triggered_by: string
+          triggered_by_email: string | null
+        }
+        Insert: {
+          affected_user_ids?: string[] | null
+          contact_info: string
+          description: string
+          id?: string
+          impact: string
+          remedial_steps: string
+          title: string
+          triggered_at?: string
+          triggered_by: string
+          triggered_by_email?: string | null
+        }
+        Update: {
+          affected_user_ids?: string[] | null
+          contact_info?: string
+          description?: string
+          id?: string
+          impact?: string
+          remedial_steps?: string
+          title?: string
+          triggered_at?: string
+          triggered_by?: string
+          triggered_by_email?: string | null
         }
         Relationships: []
       }
@@ -440,6 +494,11 @@ export type Database = {
           created_by: string | null
           description: string | null
           email: string
+          email_domain_provisioned_at: string | null
+          email_domain_resend_id: string | null
+          email_domain_status: string
+          email_domain_verified_at: string | null
+          email_subdomain: string | null
           employee_count: number | null
           gst_number: string | null
           id: string
@@ -471,6 +530,11 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           email: string
+          email_domain_provisioned_at?: string | null
+          email_domain_resend_id?: string | null
+          email_domain_status?: string
+          email_domain_verified_at?: string | null
+          email_subdomain?: string | null
           employee_count?: number | null
           gst_number?: string | null
           id?: string
@@ -502,6 +566,11 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           email?: string
+          email_domain_provisioned_at?: string | null
+          email_domain_resend_id?: string | null
+          email_domain_status?: string
+          email_domain_verified_at?: string | null
+          email_subdomain?: string | null
           employee_count?: number | null
           gst_number?: string | null
           id?: string
@@ -759,6 +828,90 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      consent_records: {
+        Row: {
+          consent_version: string
+          consented: boolean
+          consented_at: string
+          created_at: string
+          id: string
+          ip_address: string | null
+          purpose: string
+          user_agent: string | null
+          user_id: string | null
+          user_identifier: string
+          withdrawn_at: string | null
+        }
+        Insert: {
+          consent_version?: string
+          consented?: boolean
+          consented_at?: string
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          purpose: string
+          user_agent?: string | null
+          user_id?: string | null
+          user_identifier: string
+          withdrawn_at?: string | null
+        }
+        Update: {
+          consent_version?: string
+          consented?: boolean
+          consented_at?: string
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          purpose?: string
+          user_agent?: string | null
+          user_id?: string | null
+          user_identifier?: string
+          withdrawn_at?: string | null
+        }
+        Relationships: []
+      }
+      data_requests: {
+        Row: {
+          admin_notes: string | null
+          completed_at: string | null
+          created_at: string
+          details: string | null
+          due_date: string
+          id: string
+          request_type: string
+          status: string
+          user_email: string
+          user_id: string
+          user_name: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          completed_at?: string | null
+          created_at?: string
+          details?: string | null
+          due_date?: string
+          id?: string
+          request_type: string
+          status?: string
+          user_email: string
+          user_id: string
+          user_name?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          completed_at?: string | null
+          created_at?: string
+          details?: string | null
+          due_date?: string
+          id?: string
+          request_type?: string
+          status?: string
+          user_email?: string
+          user_id?: string
+          user_name?: string | null
+        }
+        Relationships: []
       }
       education: {
         Row: {
@@ -1399,7 +1552,7 @@ export type Database = {
           id: string
           is_default: boolean
           landing_page_id: string
-          slug: string
+          slug: string | null
           sort_order: number
           title: string
           updated_at: string
@@ -1410,7 +1563,7 @@ export type Database = {
           id?: string
           is_default?: boolean
           landing_page_id: string
-          slug?: string
+          slug?: string | null
           sort_order?: number
           title: string
           updated_at?: string
@@ -1421,7 +1574,7 @@ export type Database = {
           id?: string
           is_default?: boolean
           landing_page_id?: string
-          slug?: string
+          slug?: string | null
           sort_order?: number
           title?: string
           updated_at?: string
@@ -1438,7 +1591,8 @@ export type Database = {
       }
       event_landing_pages: {
         Row: {
-          association_id: string
+          association_id: string | null
+          company_id: string | null
           created_at: string
           created_by: string
           css_content: string | null
@@ -1459,7 +1613,8 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          association_id: string
+          association_id?: string | null
+          company_id?: string | null
           created_at?: string
           created_by: string
           css_content?: string | null
@@ -1480,7 +1635,8 @@ export type Database = {
           updated_at?: string
         }
         Update: {
-          association_id?: string
+          association_id?: string | null
+          company_id?: string | null
           created_at?: string
           created_by?: string
           css_content?: string | null
@@ -1506,6 +1662,20 @@ export type Database = {
             columns: ["association_id"]
             isOneToOne: false
             referencedRelation: "associations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_landing_pages_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_landing_pages_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies_public"
             referencedColumns: ["id"]
           },
           {
@@ -1731,6 +1901,56 @@ export type Database = {
         }
         Relationships: []
       }
+      invite_links: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          max_uses: number | null
+          organization_id: string
+          organization_type: string
+          role: string
+          token: string
+          use_count: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          max_uses?: number | null
+          organization_id: string
+          organization_type: string
+          role?: string
+          token: string
+          use_count?: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          max_uses?: number | null
+          organization_id?: string
+          organization_type?: string
+          role?: string
+          token?: string
+          use_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invite_links_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       key_functionaries: {
         Row: {
           association_id: string
@@ -1783,6 +2003,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      login_events: {
+        Row: {
+          id: number
+          occurred_at: string
+          user_id: string
+        }
+        Insert: {
+          id?: number
+          occurred_at?: string
+          user_id: string
+        }
+        Update: {
+          id?: number
+          occurred_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       member_invitation_audit: {
         Row: {
@@ -1841,7 +2079,7 @@ export type Database = {
           revoked_by: string | null
           role: string
           status: string
-          token: string
+          token: string | null
           token_hash: string
           updated_at: string
         }
@@ -1863,7 +2101,7 @@ export type Database = {
           revoked_by?: string | null
           role: string
           status?: string
-          token: string
+          token?: string | null
           token_hash: string
           updated_at?: string
         }
@@ -1885,7 +2123,7 @@ export type Database = {
           revoked_by?: string | null
           role?: string
           status?: string
-          token?: string
+          token?: string | null
           token_hash?: string
           updated_at?: string
         }
@@ -2093,6 +2331,42 @@ export type Database = {
         }
         Relationships: []
       }
+      pii_access_log: {
+        Row: {
+          accessed_at: string
+          accessor_email: string | null
+          column_name: string | null
+          id: string
+          purpose: string
+          subject_id: string | null
+          subject_label: string | null
+          table_name: string
+          user_id: string
+        }
+        Insert: {
+          accessed_at?: string
+          accessor_email?: string | null
+          column_name?: string | null
+          id?: string
+          purpose: string
+          subject_id?: string | null
+          subject_label?: string | null
+          table_name: string
+          user_id: string
+        }
+        Update: {
+          accessed_at?: string
+          accessor_email?: string | null
+          column_name?: string | null
+          id?: string
+          purpose?: string
+          subject_id?: string | null
+          subject_label?: string | null
+          table_name?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       post_bookmarks: {
         Row: {
           created_at: string | null
@@ -2179,52 +2453,6 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "post_likes_post_id_fkey"
-            columns: ["post_id"]
-            isOneToOne: false
-            referencedRelation: "posts"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      post_mentions: {
-        Row: {
-          created_at: string
-          id: string
-          mentioned_association_id: string | null
-          mentioned_user_id: string | null
-          post_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          mentioned_association_id?: string | null
-          mentioned_user_id?: string | null
-          post_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          mentioned_association_id?: string | null
-          mentioned_user_id?: string | null
-          post_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "post_mentions_mentioned_association_id_fkey"
-            columns: ["mentioned_association_id"]
-            isOneToOne: false
-            referencedRelation: "associations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "post_mentions_mentioned_user_id_fkey"
-            columns: ["mentioned_user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "post_mentions_post_id_fkey"
             columns: ["post_id"]
             isOneToOne: false
             referencedRelation: "posts"
@@ -2348,7 +2576,7 @@ export type Database = {
           first_name: string
           headline: string | null
           id: string
-          last_name: string
+          last_name: string | null
           linkedin_url: string | null
           location: string | null
           open_to_work: boolean | null
@@ -2368,7 +2596,7 @@ export type Database = {
           first_name: string
           headline?: string | null
           id: string
-          last_name: string
+          last_name?: string | null
           linkedin_url?: string | null
           location?: string | null
           open_to_work?: boolean | null
@@ -2388,7 +2616,7 @@ export type Database = {
           first_name?: string
           headline?: string | null
           id?: string
-          last_name?: string
+          last_name?: string | null
           linkedin_url?: string | null
           location?: string | null
           open_to_work?: boolean | null
@@ -2842,6 +3070,13 @@ export type Database = {
       }
     }
     Functions: {
+      _email_domain_functions_base_url: { Args: never; Returns: string }
+      _email_domain_service_key: { Args: never; Returns: string }
+      accept_company_invitation: {
+        Args: { p_token: string; p_user_email: string; p_user_id: string }
+        Returns: Json
+      }
+      accept_invite_link: { Args: { p_token: string }; Returns: Json }
       can_send_emails: { Args: { check_user_id: string }; Returns: boolean }
       can_view_company_details: {
         Args: { target_company_id: string; viewer_id: string }
@@ -2859,10 +3094,144 @@ export type Database = {
         Args: { member_company_id: string }
         Returns: boolean
       }
+      complete_event_registration: {
+        Args: {
+          p_association_id: string
+          p_coupon_id?: string
+          p_discount_amount?: number
+          p_email: string
+          p_final_amount?: number
+          p_first_name: string
+          p_landing_page_id: string
+          p_last_name: string
+          p_original_amount?: number
+          p_phone: string
+          p_registration_data?: Json
+          p_user_id: string
+          p_utm_campaign?: string
+          p_utm_medium?: string
+          p_utm_source?: string
+        }
+        Returns: Json
+      }
+      complete_member_invitation_db: {
+        Args: {
+          p_first_name?: string
+          p_invitation_id: string
+          p_last_name?: string
+          p_user_id: string
+        }
+        Returns: Json
+      }
+      create_invite_link: {
+        Args: {
+          p_expires_at?: string
+          p_max_uses?: number
+          p_organization_id: string
+          p_organization_type: string
+          p_role?: string
+        }
+        Returns: Json
+      }
+      create_single_member_invitation: {
+        Args: {
+          p_department?: string
+          p_designation?: string
+          p_email: string
+          p_first_name: string
+          p_last_name: string
+          p_organization_id: string
+          p_organization_type: string
+          p_role: string
+          p_user_id: string
+        }
+        Returns: Json
+      }
+      crypt: { Args: { password: string; salt: string }; Returns: string }
+      fn_refresh_pending_email_domains: { Args: never; Returns: undefined }
+      gen_salt:
+        | { Args: { type: string }; Returns: string }
+        | { Args: { iter_count: number; type: string }; Returns: string }
+      get_connect_requests_report: {
+        Args: { p_start_date: string }
+        Returns: {
+          accepted: number
+          full_name: string
+          member_id: string
+          pending: number
+          rejected: number
+          total_sent: number
+        }[]
+      }
+      get_event_onboarding_report: {
+        Args: { p_landing_page_id: string }
+        Returns: {
+          email: string
+          first_name: string
+          last_name: string
+          onboarding_completed: boolean
+          onboarding_completed_at: string
+          phone: string
+          registered_at: string
+          registration_id: string
+        }[]
+      }
+      get_invite_link_details: { Args: { p_token: string }; Returns: Json }
+      get_landing_page: {
+        Args: { p_page_slug?: string; p_slug: string }
+        Returns: Json
+      }
+      get_login_activity: {
+        Args: { p_start_date: string }
+        Returns: {
+          day: string
+          login_count: number
+          unique_users: number
+        }[]
+      }
       get_user_email: { Args: { check_user_id: string }; Returns: string }
       get_user_role_context: {
         Args: { check_user_id: string }
         Returns: string
+      }
+      get_users_last_login: {
+        Args: { p_user_ids: string[] }
+        Returns: {
+          last_sign_in_at: string
+          user_id: string
+        }[]
+      }
+      hard_delete_associations: {
+        Args: {
+          p_association_ids: string[]
+          p_notes: string
+          p_user_id: string
+        }
+        Returns: Json
+      }
+      hard_delete_companies: {
+        Args: { p_company_ids: string[]; p_notes: string; p_user_id: string }
+        Returns: Json
+      }
+      hard_delete_users_db: {
+        Args: { p_admin_user_id: string; p_notes: string; p_user_ids: string[] }
+        Returns: Json
+      }
+      import_email_list_recipients: {
+        Args: { p_list_id: string; p_recipients: Json }
+        Returns: Json
+      }
+      import_whatsapp_list_recipients: {
+        Args: { p_list_id: string; p_recipients: Json }
+        Returns: Json
+      }
+      increment_click_count: {
+        Args: { recipient_id: string }
+        Returns: undefined
+      }
+      increment_open_count: {
+        Args: { recipient_id: string }
+        Returns: undefined
       }
       is_admin: { Args: { check_user_id: string }; Returns: boolean }
       is_admin_safe: { Args: { check_user_id: string }; Returns: boolean }
@@ -2916,8 +3285,93 @@ export type Database = {
         Args: { _association_id: string; _user_id: string }
         Returns: boolean
       }
+      log_pii_access: {
+        Args: {
+          p_column: string
+          p_purpose: string
+          p_subject_id: string
+          p_subject_label: string
+          p_table: string
+        }
+        Returns: undefined
+      }
+      reconcile_campaign_statistics: {
+        Args: { p_campaign_id?: string }
+        Returns: Json
+      }
+      reconcile_coupon_counts: { Args: { p_coupon_id?: string }; Returns: Json }
+      resend_member_invitation_db: {
+        Args: { p_invitation_id: string; p_user_id: string }
+        Returns: Json
+      }
+      revoke_invite_link: { Args: { p_link_id: string }; Returns: Json }
+      revoke_member_invitation: {
+        Args: { p_invitation_id: string; p_reason?: string }
+        Returns: Json
+      }
+      setup_email_campaign: {
+        Args: {
+          p_list_id: string
+          p_sender_email: string
+          p_sender_name: string
+          p_subject: string
+          p_user_id: string
+        }
+        Returns: Json
+      }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
+      store_email_conversation: {
+        Args: {
+          p_body_html: string
+          p_body_text: string
+          p_conversation_id: string
+          p_external_message_id?: string
+          p_recipient_email: string
+          p_recipient_id: string
+          p_recipient_type: string
+          p_sender_email: string
+          p_sender_id: string
+          p_sender_name: string
+          p_sender_type: string
+          p_subject: string
+        }
+        Returns: Json
+      }
+      uuid_generate_v1: { Args: never; Returns: string }
+      uuid_generate_v1mc: { Args: never; Returns: string }
+      uuid_generate_v3: {
+        Args: { name: string; namespace: string }
+        Returns: string
+      }
+      uuid_generate_v4: { Args: never; Returns: string }
+      uuid_generate_v5: {
+        Args: { name: string; namespace: string }
+        Returns: string
+      }
+      uuid_nil: { Args: never; Returns: string }
+      uuid_ns_dns: { Args: never; Returns: string }
+      uuid_ns_oid: { Args: never; Returns: string }
+      uuid_ns_url: { Args: never; Returns: string }
+      uuid_ns_x500: { Args: never; Returns: string }
+      validate_coupon: {
+        Args: { p_code: string; p_email?: string; p_landing_page_id?: string }
+        Returns: Json
+      }
+      validate_event_registration: {
+        Args: {
+          p_coupon_code?: string
+          p_email: string
+          p_landing_page_id: string
+        }
+        Returns: Json
+      }
+      verify_and_consume_otp: {
+        Args: { p_email: string; p_otp: string }
+        Returns: Json
+      }
+      verify_company_invitation: { Args: { p_token: string }; Returns: Json }
+      verify_member_invitation: { Args: { p_token: string }; Returns: Json }
     }
     Enums: {
       [_ in never]: never
