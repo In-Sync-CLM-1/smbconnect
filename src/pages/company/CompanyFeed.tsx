@@ -919,7 +919,7 @@ export default function CompanyFeed() {
                   />
                   {imagePreview && (
                     <div className="relative mb-4">
-                      <img src={imagePreview} alt="Preview" className="rounded-lg w-full object-cover" style={{ maxHeight: '516px' }} />
+                      <img src={imagePreview} alt="Preview" className="rounded-lg w-full object-contain" style={{ maxHeight: '516px' }} />
                       <Button
                         variant="destructive"
                         size="sm"
@@ -1134,7 +1134,7 @@ export default function CompanyFeed() {
                                 <img
                                   src={post.image_url}
                                   alt="Post"
-                                  className="w-full object-cover"
+                                  className="w-full object-contain"
                                   style={{ maxHeight: '516px' }}
                                 />
                               </div>

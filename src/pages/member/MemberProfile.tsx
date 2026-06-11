@@ -1342,7 +1342,7 @@ export default function MemberProfile() {
                         <img
                           src={post.image_url}
                           alt="Post"
-                          className="w-full object-cover"
+                          className="w-full object-contain"
                           style={{ maxHeight: '516px' }}
                         />
                       </div>
@@ -1486,7 +1486,7 @@ export default function MemberProfile() {
                             <img
                               src={post.image_url}
                               alt="Post"
-                              className="w-full object-cover"
+                              className="w-full object-contain"
                               style={{ maxHeight: '516px' }}
                             />
                           </div>

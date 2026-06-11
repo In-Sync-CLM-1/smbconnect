@@ -891,7 +891,7 @@ export default function MemberFeed() {
                 <img
                   src={imagePreview}
                   alt="Preview"
-                  className="rounded-lg w-full object-cover"
+                  className="rounded-lg w-full object-contain"
                   style={{ maxHeight: '516px' }}
                 />
                 <Button
@@ -1150,7 +1150,7 @@ export default function MemberFeed() {
                             <img
                               src={post.image_url}
                               alt="Post"
-                              className="w-full object-cover"
+                              className="w-full object-contain"
                               style={{ maxHeight: '516px' }}
                             />
                           </div>

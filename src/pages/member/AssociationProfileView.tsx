@@ -528,7 +528,7 @@ export default function AssociationProfileView() {
                           <MentionText text={post.content} className="mt-3" />
                           {post.image_url && (
                             <div className="mt-3 overflow-hidden rounded-lg bg-black/5">
-                              <img src={post.image_url} alt="Post" className="w-full object-cover" style={{ maxHeight: '516px' }} />
+                              <img src={post.image_url} alt="Post" className="w-full object-contain" style={{ maxHeight: '516px' }} />
                             </div>
                           )}
                           {post.video_url && (
