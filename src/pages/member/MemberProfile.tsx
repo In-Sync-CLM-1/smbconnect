@@ -304,7 +304,7 @@ export default function MemberProfile() {
         .from('posts')
         .select('*')
         .eq('user_id', targetUserId)
-        .or('post_context.is.null,post_context.eq.member')
+        .or('post_context.is.null,post_context.eq."member"')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
