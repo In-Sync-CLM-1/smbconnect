@@ -254,7 +254,7 @@ export default function MemberFeed() {
       const { data: postsData, error } = await supabase
         .from('posts')
         .select('*')
-        .or('post_context.is.null,post_context.eq."member"')
+        .or('post_context.is.null,post_context.eq.member')
         .order('created_at', { ascending: false })
         .limit(50);
 
