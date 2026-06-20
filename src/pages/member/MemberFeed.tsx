@@ -84,6 +84,7 @@ interface Post {
   } | null;
   user_liked: boolean;
   association?: Association | null;
+  company?: { id: string; name: string; logo: string | null } | null;
 }
 
 interface Association {
@@ -249,12 +250,38 @@ export default function MemberFeed() {
       const uid = userId || userIdRef.current;
       if (!uid) return;
 
-      // Load member posts only. Association/company posts stay on their own
-      // pages and must never appear in a user's personal timeline.
+      // Work out which associations/companies this member belongs to, so their
+      // org posts surface in the personal feed — scoped to the member's own
+      // associations/company, never every org on the platform.
+      const [managerRes, memberOrgRes] = await Promise.all([
+        supabase.from('association_managers').select('association_id').eq('user_id', uid).eq('is_active', true),
+        supabase.from('members').select('company_id, companies!inner(association_id)').eq('user_id', uid).eq('is_active', true),
+      ]);
+
+      const myAssociationIds = new Set<string>();
+      managerRes.data?.forEach((m: any) => { if (m.association_id) myAssociationIds.add(m.association_id); });
+      const myCompanyIds = new Set<string>();
+      memberOrgRes.data?.forEach((m: any) => {
+        if (m.company_id) myCompanyIds.add(m.company_id);
+        const company = m.companies as any;
+        if (company?.association_id) myAssociationIds.add(company.association_id);
+      });
+
+      // Personal posts (everyone's) + association posts from my associations +
+      // company posts from my companies. Org posts are attributed to the org,
+      // not the individual who published them (handled at render time).
+      const orClauses = ['post_context.is.null', 'post_context.eq.member'];
+      if (myAssociationIds.size > 0) {
+        orClauses.push(`and(post_context.eq.association,organization_id.in.(${Array.from(myAssociationIds).join(',')}))`);
+      }
+      if (myCompanyIds.size > 0) {
+        orClauses.push(`and(post_context.eq.company,organization_id.in.(${Array.from(myCompanyIds).join(',')}))`);
+      }
+
       const { data: postsData, error } = await supabase
         .from('posts')
         .select('*')
-        .or('post_context.is.null,post_context.eq.member')
+        .or(orClauses.join(','))
         .order('created_at', { ascending: false })
         .limit(50);
 
@@ -271,11 +298,21 @@ export default function MemberFeed() {
       const allUserIds = Array.from(new Set([...userIds, ...originalAuthorIds]));
       const postIds = postsData.map(p => p.id);
 
-      // Parallel fetch: profiles, members, likes (3 independent queries)
-      const [profilesRes, membersRes, likesRes] = await Promise.all([
+      // Org identities for association/company posts (for org attribution)
+      const assocOrgIds = Array.from(new Set(
+        postsData.filter((p: any) => p.post_context === 'association' && p.organization_id).map((p: any) => p.organization_id)
+      ));
+      const companyOrgIds = Array.from(new Set(
+        postsData.filter((p: any) => p.post_context === 'company' && p.organization_id).map((p: any) => p.organization_id)
+      ));
+
+      // Parallel fetch: profiles, members, likes, association + company identities
+      const [profilesRes, membersRes, likesRes, assocRes, companiesRes] = await Promise.all([
         supabase.from('profiles').select('id, first_name, last_name, avatar, headline').in('id', allUserIds),
         supabase.from('members').select('user_id, company:companies(name)').in('user_id', userIds).eq('is_active', true),
         supabase.from('post_likes').select('post_id').eq('user_id', uid).in('post_id', postIds),
+        assocOrgIds.length ? supabase.from('associations').select('id, name, logo').in('id', assocOrgIds) : Promise.resolve({ data: [] as any[] }),
+        companyOrgIds.length ? supabase.from('companies').select('id, name, logo').in('id', companyOrgIds) : Promise.resolve({ data: [] as any[] }),
       ]);
 
       const profilesById = (profilesRes.data || []).reduce((acc: Record<string, any>, profile: any) => {
@@ -285,6 +322,16 @@ export default function MemberFeed() {
 
       const membersByUserId = (membersRes.data || []).reduce((acc: Record<string, any>, m: any) => {
         if (!acc[m.user_id]) acc[m.user_id] = m;
+        return acc;
+      }, {} as Record<string, any>);
+
+      const assocById = (assocRes.data || []).reduce((acc: Record<string, any>, a: any) => {
+        acc[a.id] = a;
+        return acc;
+      }, {} as Record<string, any>);
+
+      const companyById = (companiesRes.data || []).reduce((acc: Record<string, any>, c: any) => {
+        acc[c.id] = c;
         return acc;
       }, {} as Record<string, any>);
 
@@ -298,7 +345,8 @@ export default function MemberFeed() {
           profile: profileData,
           original_author: post.original_author_id ? profilesById[post.original_author_id] : null,
           member: membersByUserId[post.user_id] || null,
-          association: null,
+          association: post.post_context === 'association' ? (assocById[post.organization_id] || null) : null,
+          company: post.post_context === 'company' ? (companyById[post.organization_id] || null) : null,
           user_liked: likedPostIds.has(post.id),
         };
       });
@@ -1040,15 +1088,22 @@ export default function MemberFeed() {
                        fullName.includes(searchLower);
               })
               .map((post) => {
-              const isAssociationPost = post.post_context === 'association' && post.association;
-              const fullName = isAssociationPost 
-                ? post.association!.name 
+              const isAssociationPost = post.post_context === 'association' && !!post.association;
+              const isCompanyPost = post.post_context === 'company' && !!post.company;
+              const isOrgPost = isAssociationPost || isCompanyPost;
+              const orgName = isAssociationPost ? post.association!.name : isCompanyPost ? post.company!.name : '';
+              const orgLogo = isAssociationPost ? post.association!.logo : isCompanyPost ? post.company!.logo : null;
+              const orgRoute = isAssociationPost
+                ? `/member/associations/${post.organization_id}`
+                : `/member/company/${post.organization_id}`;
+              const fullName = isOrgPost
+                ? orgName
                 : `${post.profile.first_name} ${post.profile.last_name}`;
-              const initials = isAssociationPost
-                ? post.association!.name.substring(0, 2).toUpperCase()
+              const initials = isOrgPost
+                ? orgName.substring(0, 2).toUpperCase()
                 : `${post.profile.first_name[0]}${post.profile.last_name[0]}`;
-              const avatarSrc = isAssociationPost
-                ? post.association!.logo || undefined
+              const avatarSrc = isOrgPost
+                ? orgLogo || undefined
                 : (post.profile.avatar || undefined);
               const isOwnPost = post.user_id === currentUserId;
 
@@ -1058,15 +1113,15 @@ export default function MemberFeed() {
                     {/* Engagement badge */}
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-2">
-                        {/* Association badge */}
-                        {isAssociationPost && (
+                        {/* Org badge — post made from an association/company page */}
+                        {isOrgPost && (
                           <div className="flex items-center gap-1 text-xs text-primary font-medium">
                             <Building2 className="w-3 h-3" />
-                            <span>Association Update</span>
+                            <span>{isAssociationPost ? 'Association Update' : 'Company Update'}</span>
                           </div>
                         )}
                         {/* Repost indicator */}
-                        {!isAssociationPost && post.original_post_id && post.original_author && (
+                        {!isOrgPost && post.original_post_id && post.original_author && (
                           <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <Repeat2 className="w-4 h-4" />
                             <span>
@@ -1085,10 +1140,10 @@ export default function MemberFeed() {
                       />
                     </div>
                     <div className="flex gap-4 min-w-0">
-                      <Avatar 
+                      <Avatar
                         className="cursor-pointer"
-                        onClick={() => isAssociationPost 
-                          ? navigate(`/member/associations/${post.organization_id}`)
+                        onClick={() => isOrgPost
+                          ? navigate(orgRoute)
                           : navigate(`/profile/${post.user_id}`)
                         }
                       >
@@ -1100,21 +1155,21 @@ export default function MemberFeed() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between">
                           <div>
-                            <h3 
+                            <h3
                               className="font-semibold hover:underline cursor-pointer"
-                              onClick={() => isAssociationPost
-                                ? navigate(`/member/associations/${post.organization_id}`)
+                              onClick={() => isOrgPost
+                                ? navigate(orgRoute)
                                 : navigate(`/profile/${post.user_id}`)
                               }
                             >
                               {fullName}
                             </h3>
-                            {!isAssociationPost && !post.original_post_id && post.profile.headline && (
+                            {!isOrgPost && !post.original_post_id && post.profile.headline && (
                               <p className="text-sm text-muted-foreground">
                                 {post.profile.headline}
                               </p>
                             )}
-                            {!isAssociationPost && !post.original_post_id && post.member?.company && (
+                            {!isOrgPost && !post.original_post_id && post.member?.company && (
                               <p className="text-sm text-muted-foreground">
                                 {post.member.company.name}
                               </p>
