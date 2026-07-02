@@ -85,6 +85,7 @@ interface Post {
   user_liked: boolean;
   association?: Association | null;
   company?: { id: string; name: string; logo: string | null } | null;
+  is_own_org: boolean;
 }
 
 interface Association {
@@ -251,8 +252,7 @@ export default function MemberFeed() {
       if (!uid) return;
 
       // Work out which associations/companies this member belongs to, so their
-      // org posts surface in the personal feed — scoped to the member's own
-      // associations/company, never every org on the platform.
+      // own org's posts can be highlighted in the feed.
       const [managerRes, memberOrgRes] = await Promise.all([
         supabase.from('association_managers').select('association_id').eq('user_id', uid).eq('is_active', true),
         supabase.from('members').select('company_id, companies!inner(association_id)').eq('user_id', uid).eq('is_active', true),
@@ -267,21 +267,12 @@ export default function MemberFeed() {
         if (company?.association_id) myAssociationIds.add(company.association_id);
       });
 
-      // Personal posts (everyone's) + association posts from my associations +
-      // company posts from my companies. Org posts are attributed to the org,
-      // not the individual who published them (handled at render time).
-      const orClauses = ['post_context.is.null', 'post_context.eq.member'];
-      if (myAssociationIds.size > 0) {
-        orClauses.push(`and(post_context.eq.association,organization_id.in.(${Array.from(myAssociationIds).join(',')}))`);
-      }
-      if (myCompanyIds.size > 0) {
-        orClauses.push(`and(post_context.eq.company,organization_id.in.(${Array.from(myCompanyIds).join(',')}))`);
-      }
-
+      // Platform-wide feed: every post, from every association/company. Org
+      // posts are attributed to the org, not the individual who published them
+      // (handled at render time); posts from the member's own org are highlighted.
       const { data: postsData, error } = await supabase
         .from('posts')
         .select('*')
-        .or(orClauses.join(','))
         .order('created_at', { ascending: false })
         .limit(50);
 
@@ -340,6 +331,9 @@ export default function MemberFeed() {
       // Assemble posts with all data (no per-post queries)
       const postsWithProfiles = postsData.map(post => {
         const profileData = profilesById[post.user_id] || { first_name: '', last_name: '', avatar: null, headline: null };
+        const isOwnOrg =
+          (post.post_context === 'association' && myAssociationIds.has(post.organization_id)) ||
+          (post.post_context === 'company' && myCompanyIds.has(post.organization_id));
         return {
           ...post,
           profile: profileData,
@@ -348,6 +342,7 @@ export default function MemberFeed() {
           association: post.post_context === 'association' ? (assocById[post.organization_id] || null) : null,
           company: post.post_context === 'company' ? (companyById[post.organization_id] || null) : null,
           user_liked: likedPostIds.has(post.id),
+          is_own_org: isOwnOrg,
         };
       });
 
@@ -1108,7 +1103,7 @@ export default function MemberFeed() {
               const isOwnPost = post.user_id === currentUserId;
 
               return (
-                <Card key={post.id}>
+                <Card key={post.id} className={post.is_own_org ? 'ring-2 ring-primary/60 border-primary/40' : ''}>
                   <CardContent className="pt-6">
                     {/* Engagement badge */}
                     <div className="flex items-center justify-between mb-3">
@@ -1117,7 +1112,11 @@ export default function MemberFeed() {
                         {isOrgPost && (
                           <div className="flex items-center gap-1 text-xs text-primary font-medium">
                             <Building2 className="w-3 h-3" />
-                            <span>{isAssociationPost ? 'Association Update' : 'Company Update'}</span>
+                            <span>
+                              {post.is_own_org
+                                ? (isAssociationPost ? 'Your Association' : 'Your Company')
+                                : (isAssociationPost ? 'Association Update' : 'Company Update')}
+                            </span>
                           </div>
                         )}
                         {/* Repost indicator */}
