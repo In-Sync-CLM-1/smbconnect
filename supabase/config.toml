@@ -1,4 +1,4 @@
-project_id = "zcmfxpknsybponbudyqb"
+project_id = "wdamzbyvsbergvxhefkl"
 
 [functions.admin-reset-user-password]
 verify_jwt = false

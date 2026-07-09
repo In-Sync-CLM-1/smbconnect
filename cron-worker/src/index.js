@@ -2,8 +2,8 @@
 // Each deployed Worker sets TARGET_FN (and optional BODY) in its config and
 // runs its own cron trigger, POSTing to that single function. Replaces in-DB
 // pg_cron + pg_net.
-const FN_BASE = "https://zcmfxpknsybponbudyqb.supabase.co/functions/v1";
-const RPC_BASE = "https://zcmfxpknsybponbudyqb.supabase.co/rest/v1/rpc";
+const FN_BASE = "https://wdamzbyvsbergvxhefkl.supabase.co/functions/v1";
+const RPC_BASE = "https://wdamzbyvsbergvxhefkl.supabase.co/rest/v1/rpc";
 
 async function tick(env) {
   if (!env.TARGET_FN) return new Response("no TARGET_FN configured\n", { status: 500 });

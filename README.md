@@ -22,9 +22,9 @@ npm run lint
 `.env` (gitignored) must contain at minimum:
 
 ```env
-VITE_SUPABASE_URL=https://zcmfxpknsybponbudyqb.supabase.co
+VITE_SUPABASE_URL=https://wdamzbyvsbergvxhefkl.supabase.co
 VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
-VITE_SUPABASE_PROJECT_ID=zcmfxpknsybponbudyqb
+VITE_SUPABASE_PROJECT_ID=wdamzbyvsbergvxhefkl
 ```
 
 Only values prefixed `VITE_` are inlined into the browser bundle. Anything that
