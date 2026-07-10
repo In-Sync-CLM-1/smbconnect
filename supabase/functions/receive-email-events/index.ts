@@ -51,11 +51,15 @@ async function verifyWebhookSignature(
   // Remove whsec_ prefix from secret
   const secretKey = secret.startsWith('whsec_') ? secret.substring(6) : secret;
 
+  // Svix signing secrets are base64-encoded; the HMAC key is the decoded bytes,
+  // not the base64 string itself
+  const keyBytes = Uint8Array.from(atob(secretKey), (c) => c.charCodeAt(0));
+
   // Create HMAC signature
   const encoder = new TextEncoder();
   const key = await crypto.subtle.importKey(
     'raw',
-    encoder.encode(secretKey),
+    keyBytes,
     { name: 'HMAC', hash: 'SHA-256' },
     false,
     ['sign']
