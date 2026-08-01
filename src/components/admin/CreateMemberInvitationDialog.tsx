@@ -24,6 +24,7 @@ import {
 } from '@/components/ui/select';
 import { Loader2, UserPlus, Mail } from 'lucide-react';
 import { toast } from 'sonner';
+import { getFunctionErrorMessage } from '@/lib/functionError';
 
 const invitationSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -91,15 +92,7 @@ export function CreateMemberInvitationDialog({
 
       // Handle edge function errors (including 409 conflicts)
       if (error) {
-        // Try to get the specific error message from the response
-        let errorMessage = 'Failed to send invitation';
-        
-        if (result && typeof result === 'object' && 'error' in result) {
-          errorMessage = result.error;
-        } else if (error.message) {
-          errorMessage = error.message;
-        }
-        
+        const errorMessage = await getFunctionErrorMessage(error, 'Failed to send invitation');
         toast.error(errorMessage);
         return;
       }

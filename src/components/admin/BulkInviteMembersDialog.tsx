@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Download, Upload, Users, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { getFunctionErrorMessage } from '@/lib/functionError';
 
 interface BulkInviteMembersDialogProps {
   organizationId: string;
@@ -112,12 +113,19 @@ export function BulkInviteMembersDialog({
 
         setProgress({ current: invitations.length, total: invitations.length });
 
+        if (error) {
+          setUploading(false);
+          const errorMessage = await getFunctionErrorMessage(error, 'Failed to send invitations');
+          toast.error(errorMessage);
+          event.target.value = '';
+          return;
+        }
+
         const success = data?.results?.successful?.length || 0;
         const failed = data?.results?.failed?.length || 0;
 
-        
         setUploading(false);
-        
+
         if (success > 0) {
           toast.success(`Successfully sent ${success} invitation${success > 1 ? 's' : ''}`, {
             description: failed > 0 ? `${failed} invitation${failed > 1 ? 's' : ''} failed` : undefined,
