@@ -1,1 +1,2 @@
 refresh-org-email-domains|rpc:fn_refresh_pending_email_domains||*/5 * * * *
+expire-member-invitations|rpc:expire_stale_member_invitations||*/30 * * * *
