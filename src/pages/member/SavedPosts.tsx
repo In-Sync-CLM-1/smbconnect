@@ -12,6 +12,7 @@ import { CommentsSection } from '@/components/member/CommentsSection';
 import { SharePostDropdown } from '@/components/post/SharePostDropdown';
 import { BookmarkButton } from '@/components/post/BookmarkButton';
 import { MobileNavigation } from '@/components/layout/MobileNavigation';
+import { PostImageGrid, resolvePostImages } from '@/components/post/PostImageGrid';
 
 interface SavedPost {
   id: string;
@@ -21,6 +22,7 @@ interface SavedPost {
     id: string;
     content: string;
     image_url: string | null;
+    image_urls: string[] | null;
     video_url: string | null;
     likes_count: number;
     comments_count: number;
@@ -242,16 +244,7 @@ export default function SavedPosts() {
 
                         <MentionText text={post.content} className="mt-4" />
 
-                        {post.image_url && (
-                          <div className="mt-4 overflow-hidden rounded-lg bg-black/5">
-                            <img
-                              src={post.image_url}
-                              alt="Post"
-                              className="w-full object-contain"
-                              style={{ maxHeight: '516px' }}
-                            />
-                          </div>
-                        )}
+                        <PostImageGrid images={resolvePostImages(post)} className="mt-4" />
 
                         {post.video_url && (
                           <video

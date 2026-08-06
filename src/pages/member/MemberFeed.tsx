@@ -49,11 +49,13 @@ import { SharePostDropdown } from '@/components/post/SharePostDropdown';
 import { BookmarkButton } from '@/components/post/BookmarkButton';
 import { PostEngagementBadge } from '@/components/post/PostEngagementBadge';
 import { formatDistanceToNow } from 'date-fns';
+import { PostImageGrid, resolvePostImages } from '@/components/post/PostImageGrid';
 
 interface Post {
   id: string;
   content: string;
   image_url: string | null;
+  image_urls: string[] | null;
   video_url: string | null;
   document_url: string | null;
   likes_count: number;
@@ -105,8 +107,8 @@ export default function MemberFeed() {
   const [profile, setProfile] = useState<any>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [videoPreview, setVideoPreview] = useState<string | null>(null);
   const [documentFile, setDocumentFile] = useState<File | null>(null);
@@ -359,7 +361,7 @@ export default function MemberFeed() {
   };
 
   const handleCreatePost = async () => {
-    if (!newPostContent.trim() && !imageFile && !videoFile && !documentFile) return;
+    if (!newPostContent.trim() && imageFiles.length === 0 && !videoFile && !documentFile) return;
 
     setPosting(true);
     try {
@@ -367,18 +369,18 @@ export default function MemberFeed() {
       const user = session?.user;
       if (!user) throw new Error('Not authenticated');
 
-      let imageUrl = null;
+      let imageUrls: string[] = [];
       let videoUrl = null;
       let documentUrl = null;
 
-      // Upload image if present
-      if (imageFile) {
-        const fileExt = imageFile.name.split('.').pop();
-        const fileName = `${user.id}/post-${Date.now()}.${fileExt}`;
+      // Upload images if present
+      for (const file of imageFiles) {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${user.id}/post-${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
 
         const { error: uploadError } = await supabase.storage
           .from('profile-images')
-          .upload(fileName, imageFile);
+          .upload(fileName, file);
 
         if (uploadError) throw uploadError;
 
@@ -386,7 +388,7 @@ export default function MemberFeed() {
           .from('profile-images')
           .getPublicUrl(fileName);
 
-        imageUrl = publicUrl;
+        imageUrls.push(publicUrl);
       }
 
       // Upload video if present
@@ -429,7 +431,8 @@ export default function MemberFeed() {
       const { data: postData, error } = await supabase.from('posts').insert({
         user_id: user.id,
         content: contentToSave,
-        image_url: imageUrl,
+        image_url: imageUrls[0] || null,
+        image_urls: imageUrls.length > 0 ? imageUrls : null,
         video_url: videoUrl,
         document_url: documentUrl,
       }).select('id').single();
@@ -455,8 +458,8 @@ export default function MemberFeed() {
         description: 'Post created',
       });
       setNewPostContent('');
-      setImagePreview(null);
-      setImageFile(null);
+      setImagePreviews([]);
+      setImageFiles([]);
       setVideoPreview(null);
       setVideoFile(null);
       setDocumentFile(null);
@@ -472,39 +475,66 @@ export default function MemberFeed() {
     }
   };
 
+  const MAX_POST_IMAGES = 10;
+
   const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
 
-    // Validate post image upload (8MB limit)
     const { validatePostImageUpload, resizeImageForUpload } = await import('@/lib/uploadValidation');
-    const validation = await validatePostImageUpload(file);
 
-    if (!validation.valid) {
+    const room = MAX_POST_IMAGES - imageFiles.length;
+    if (room <= 0) {
       toast({
-        title: 'Validation Error',
-        description: validation.error,
+        title: 'Limit reached',
+        description: `You can attach up to ${MAX_POST_IMAGES} photos.`,
         variant: 'destructive',
       });
       return;
     }
+    const filesToAdd = files.slice(0, room);
+    if (files.length > filesToAdd.length) {
+      toast({
+        title: 'Limit reached',
+        description: `Only ${filesToAdd.length} of ${files.length} photos were added (max ${MAX_POST_IMAGES} per post).`,
+        variant: 'destructive',
+      });
+    }
 
-    // Resize to LinkedIn-standard max 1200px before upload
-    const resizedFile = await resizeImageForUpload(file);
+    const resizedFiles: File[] = [];
+    for (const file of filesToAdd) {
+      const validation = await validatePostImageUpload(file);
+      if (!validation.valid) {
+        toast({
+          title: 'Validation Error',
+          description: `${file.name}: ${validation.error}`,
+          variant: 'destructive',
+        });
+        continue;
+      }
+      // Resize to LinkedIn-standard max 1200px before upload
+      resizedFiles.push(await resizeImageForUpload(file));
+    }
+    if (resizedFiles.length === 0) return;
 
-    // Clear video if selecting image
+    // Clear video if selecting images
     setVideoFile(null);
     setVideoPreview(null);
     if (videoInputRef.current) {
       videoInputRef.current.value = '';
     }
 
-    setImageFile(resizedFile);
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setImagePreview(reader.result as string);
-    };
-    reader.readAsDataURL(file);
+    setImageFiles(prev => [...prev, ...resizedFiles]);
+    resizedFiles.forEach(file => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreviews(prev => [...prev, reader.result as string]);
+      };
+      reader.readAsDataURL(file);
+    });
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   const handleVideoSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -524,9 +554,9 @@ export default function MemberFeed() {
       return;
     }
 
-    // Clear image if selecting video
-    setImageFile(null);
-    setImagePreview(null);
+    // Clear images if selecting video
+    setImageFiles([]);
+    setImagePreviews([]);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -536,9 +566,9 @@ export default function MemberFeed() {
     setVideoPreview(url);
   };
 
-  const removeImage = () => {
-    setImagePreview(null);
-    setImageFile(null);
+  const removeImage = (index: number) => {
+    setImagePreviews(prev => prev.filter((_, i) => i !== index));
+    setImageFiles(prev => prev.filter((_, i) => i !== index));
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -583,8 +613,8 @@ export default function MemberFeed() {
 
   const clearPostComposer = () => {
     setNewPostContent('');
-    setImageFile(null);
-    setImagePreview(null);
+    setImageFiles([]);
+    setImagePreviews([]);
     setVideoFile(null);
     setVideoPreview(null);
     setDocumentFile(null);
@@ -593,7 +623,7 @@ export default function MemberFeed() {
     if (documentInputRef.current) documentInputRef.current.value = '';
   };
 
-  const hasAnyContent = newPostContent.trim() || imageFile || videoFile || documentFile;
+  const hasAnyContent = newPostContent.trim() || imageFiles.length > 0 || videoFile || documentFile;
 
   const getDocumentName = (url: string) => {
     const parts = url.split('/');
@@ -699,6 +729,7 @@ export default function MemberFeed() {
         .insert([{
           content: post.content,
           image_url: post.image_url,
+          image_urls: post.image_urls,
           video_url: post.video_url,
           user_id: currentUserId,
           original_post_id: post.original_post_id || post.id,
@@ -929,22 +960,25 @@ export default function MemberFeed() {
               </div>
             </div>
             
-            {imagePreview && (
-              <div className="relative mb-4">
-                <img
-                  src={imagePreview}
-                  alt="Preview"
-                  className="rounded-lg w-full object-contain"
-                  style={{ maxHeight: '516px' }}
-                />
-                <Button
-                  variant="destructive"
-                  size="icon"
-                  className="absolute top-2 right-2"
-                  onClick={removeImage}
-                >
-                  <X className="w-4 h-4" />
-                </Button>
+            {imagePreviews.length > 0 && (
+              <div className="grid grid-cols-3 gap-2 mb-4">
+                {imagePreviews.map((preview, index) => (
+                  <div key={index} className="relative">
+                    <img
+                      src={preview}
+                      alt={`Preview ${index + 1}`}
+                      className="rounded-lg w-full h-32 object-cover"
+                    />
+                    <Button
+                      variant="destructive"
+                      size="icon"
+                      className="absolute top-1 right-1 h-6 w-6"
+                      onClick={() => removeImage(index)}
+                    >
+                      <X className="w-3 h-3" />
+                    </Button>
+                  </div>
+                ))}
               </div>
             )}
 
@@ -987,6 +1021,7 @@ export default function MemberFeed() {
                   ref={fileInputRef}
                   type="file"
                   accept="image/*"
+                  multiple
                   onChange={handleImageSelect}
                   className="hidden"
                 />
@@ -1009,7 +1044,7 @@ export default function MemberFeed() {
                   size="sm"
                   onClick={() => fileInputRef.current?.click()}
                   className="text-muted-foreground hover:text-foreground hover:bg-transparent"
-                  title="Add photo (max 8MB)"
+                  title="Add photos (max 8MB each, up to 10)"
                 >
                   <ImageIcon className="w-5 h-5 mr-2" />
                   Photo
@@ -1050,7 +1085,7 @@ export default function MemberFeed() {
                 )}
                 <Button
                   onClick={handleCreatePost}
-                  disabled={(!newPostContent.trim() && !imageFile && !videoFile && !documentFile) || posting}
+                  disabled={(!newPostContent.trim() && imageFiles.length === 0 && !videoFile && !documentFile) || posting}
                   size="sm"
                   className="bg-primary hover:bg-primary/90"
                 >
@@ -1199,16 +1234,7 @@ export default function MemberFeed() {
 
                         <MentionText text={post.content} className="mt-4" />
 
-                        {post.image_url && (
-                          <div className="mt-4 overflow-hidden rounded-lg bg-black/5">
-                            <img
-                              src={post.image_url}
-                              alt="Post"
-                              className="w-full object-contain"
-                              style={{ maxHeight: '516px' }}
-                            />
-                          </div>
-                        )}
+                        <PostImageGrid images={resolvePostImages(post)} className="mt-4" />
 
                         {post.video_url && (
                           <video

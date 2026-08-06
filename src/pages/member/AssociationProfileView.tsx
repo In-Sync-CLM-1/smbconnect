@@ -14,6 +14,7 @@ import { CommentsSection } from "@/components/member/CommentsSection";
 import { SharePostDropdown } from "@/components/post/SharePostDropdown";
 import { BookmarkButton } from "@/components/post/BookmarkButton";
 import { PostEngagementBadge } from "@/components/post/PostEngagementBadge";
+import { PostImageGrid, resolvePostImages } from "@/components/post/PostImageGrid";
 import { FloatingChat } from "@/components/messages/FloatingChat";
 import { MobileNavigation } from "@/components/layout/MobileNavigation";
 import { UniversalSearch } from "@/components/UniversalSearch";
@@ -62,6 +63,7 @@ interface Post {
   id: string;
   content: string;
   image_url: string | null;
+  image_urls: string[] | null;
   video_url: string | null;
   document_url: string | null;
   created_at: string;
@@ -344,6 +346,7 @@ export default function AssociationProfileView() {
       await supabase.from("posts").insert([{
         content: post.content,
         image_url: post.image_url,
+        image_urls: post.image_urls,
         user_id: currentUserId,
         original_post_id: post.original_post_id || post.id,
         original_author_id: post.original_author_id || post.user_id,
@@ -526,11 +529,7 @@ export default function AssociationProfileView() {
                             {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
                           </p>
                           <MentionText text={post.content} className="mt-3" />
-                          {post.image_url && (
-                            <div className="mt-3 overflow-hidden rounded-lg bg-black/5">
-                              <img src={post.image_url} alt="Post" className="w-full object-contain" style={{ maxHeight: '516px' }} />
-                            </div>
-                          )}
+                          <PostImageGrid images={resolvePostImages(post)} className="mt-3" />
                           {post.video_url && (
                             <video src={post.video_url} controls className="mt-3 rounded-lg max-h-96 w-full max-w-full" />
                           )}

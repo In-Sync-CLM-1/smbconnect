@@ -17,6 +17,7 @@ import { EditPostDialog } from '@/components/member/EditPostDialog';
 import { SharePostDropdown } from '@/components/post/SharePostDropdown';
 import { BookmarkButton } from '@/components/post/BookmarkButton';
 import { PostEngagementBadge } from '@/components/post/PostEngagementBadge';
+import { PostImageGrid, resolvePostImages } from '@/components/post/PostImageGrid';
 import { formatDistanceToNow } from 'date-fns';
 import { 
   ArrowLeft, 
@@ -120,6 +121,7 @@ interface ProfilePost {
   id: string;
   content: string;
   image_url: string | null;
+  image_urls: string[] | null;
   video_url: string | null;
   document_url: string | null;
   likes_count: number;
@@ -1337,16 +1339,7 @@ export default function MemberProfile() {
                     <p className="whitespace-pre-wrap mb-4">{post.content}</p>
 
                     {/* Post Media */}
-                    {post.image_url && (
-                      <div className="overflow-hidden rounded-lg bg-black/5 mb-4">
-                        <img
-                          src={post.image_url}
-                          alt="Post"
-                          className="w-full object-contain"
-                          style={{ maxHeight: '516px' }}
-                        />
-                      </div>
-                    )}
+                    <PostImageGrid images={resolvePostImages(post)} className="mb-4" />
                     {post.video_url && (
                       <video
                         src={post.video_url}
@@ -1481,16 +1474,7 @@ export default function MemberProfile() {
                         <p className="whitespace-pre-wrap mb-4">{post.content}</p>
 
                         {/* Post Media */}
-                        {post.image_url && (
-                          <div className="overflow-hidden rounded-lg bg-black/5 mb-4">
-                            <img
-                              src={post.image_url}
-                              alt="Post"
-                              className="w-full object-contain"
-                              style={{ maxHeight: '516px' }}
-                            />
-                          </div>
-                        )}
+                        <PostImageGrid images={resolvePostImages(post)} className="mb-4" />
                         {post.video_url && (
                           <video
                             src={post.video_url}
