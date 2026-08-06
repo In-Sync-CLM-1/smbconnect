@@ -27,11 +27,13 @@ import { Badge } from '@/components/ui/badge';
 import { BackButton } from '@/components/BackButton';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { PostImageGrid, resolvePostImages } from '@/components/post/PostImageGrid';
 
 interface Post {
   id: string;
   content: string;
   image_url: string | null;
+  image_urls: string[] | null;
   video_url: string | null;
   document_url: string | null;
   created_at: string;
@@ -88,8 +90,8 @@ export default function CompanyFeed() {
   const [posting, setPosting] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [showComments, setShowComments] = useState<{ [key: string]: boolean }>({});
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [videoPreview, setVideoPreview] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -327,24 +329,47 @@ export default function CompanyFeed() {
     }
   };
 
+  const MAX_POST_IMAGES = 10;
+
   const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
 
     const { validatePostImageUpload, resizeImageForUpload } = await import('@/lib/uploadValidation');
-    const validation = await validatePostImageUpload(file);
 
-    if (!validation.valid) {
+    const room = MAX_POST_IMAGES - imageFiles.length;
+    if (room <= 0) {
       toast({
-        title: 'Validation Error',
-        description: validation.error,
+        title: 'Limit reached',
+        description: `You can attach up to ${MAX_POST_IMAGES} photos.`,
         variant: 'destructive',
       });
       return;
     }
+    const filesToAdd = files.slice(0, room);
+    if (files.length > filesToAdd.length) {
+      toast({
+        title: 'Limit reached',
+        description: `Only ${filesToAdd.length} of ${files.length} photos were added (max ${MAX_POST_IMAGES} per post).`,
+        variant: 'destructive',
+      });
+    }
 
-    // Resize to LinkedIn-standard max 1200px before upload
-    const resizedFile = await resizeImageForUpload(file);
+    const resizedFiles: File[] = [];
+    for (const file of filesToAdd) {
+      const validation = await validatePostImageUpload(file);
+      if (!validation.valid) {
+        toast({
+          title: 'Validation Error',
+          description: `${file.name}: ${validation.error}`,
+          variant: 'destructive',
+        });
+        continue;
+      }
+      // Resize to LinkedIn-standard max 1200px before upload
+      resizedFiles.push(await resizeImageForUpload(file));
+    }
+    if (resizedFiles.length === 0) return;
 
     setVideoFile(null);
     if (videoPreview) {
@@ -352,12 +377,17 @@ export default function CompanyFeed() {
     }
     setVideoPreview(null);
 
-    setImageFile(resizedFile);
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setImagePreview(reader.result as string);
-    };
-    reader.readAsDataURL(file);
+    setImageFiles(prev => [...prev, ...resizedFiles]);
+    resizedFiles.forEach(file => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreviews(prev => [...prev, reader.result as string]);
+      };
+      reader.readAsDataURL(file);
+    });
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   const handleVideoSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -376,17 +406,17 @@ export default function CompanyFeed() {
       return;
     }
 
-    setImageFile(null);
-    setImagePreview(null);
+    setImageFiles([]);
+    setImagePreviews([]);
 
     setVideoFile(file);
     const url = URL.createObjectURL(file);
     setVideoPreview(url);
   };
 
-  const removeImage = () => {
-    setImageFile(null);
-    setImagePreview(null);
+  const removeImage = (index: number) => {
+    setImagePreviews(prev => prev.filter((_, i) => i !== index));
+    setImageFiles(prev => prev.filter((_, i) => i !== index));
   };
 
   const removeVideo = () => {
@@ -425,8 +455,8 @@ export default function CompanyFeed() {
 
   const clearPostComposer = () => {
     setNewPost('');
-    setImageFile(null);
-    setImagePreview(null);
+    setImageFiles([]);
+    setImagePreviews([]);
     setVideoFile(null);
     setVideoPreview(null);
     setDocumentFile(null);
@@ -435,7 +465,7 @@ export default function CompanyFeed() {
     if (documentInputRef.current) documentInputRef.current.value = '';
   };
 
-  const hasAnyContent = newPost.trim() || imageFile || videoFile || documentFile;
+  const hasAnyContent = newPost.trim() || imageFiles.length > 0 || videoFile || documentFile;
 
   const uploadImage = async (file: File): Promise<string | null> => {
     try {
@@ -461,18 +491,19 @@ export default function CompanyFeed() {
   };
 
   const handleCreatePost = async () => {
-    if (!newPost.trim() && !imageFile && !videoFile) return;
+    if (!newPost.trim() && imageFiles.length === 0 && !videoFile) return;
 
     setPosting(true);
     try {
-      let imageUrl = null;
+      let imageUrls: string[] = [];
       let videoUrl = null;
       let documentUrl = null;
-      
-      if (imageFile) {
-        imageUrl = await uploadImage(imageFile);
+
+      for (const file of imageFiles) {
+        const uploadedUrl = await uploadImage(file);
+        if (uploadedUrl) imageUrls.push(uploadedUrl);
       }
-      
+
       if (videoFile) {
         videoUrl = await uploadImage(videoFile);
       }
@@ -483,10 +514,11 @@ export default function CompanyFeed() {
 
       const { error } = await supabase
         .from('posts')
-        .insert([{ 
-          content: newPost.trim(), 
-          user_id: currentUserId, 
-          image_url: imageUrl,
+        .insert([{
+          content: newPost.trim(),
+          user_id: currentUserId,
+          image_url: imageUrls[0] || null,
+          image_urls: imageUrls.length > 0 ? imageUrls : null,
           video_url: videoUrl,
           document_url: documentUrl,
           post_context: 'company',
@@ -496,8 +528,8 @@ export default function CompanyFeed() {
       if (error) throw error;
 
       setNewPost('');
-      setImageFile(null);
-      setImagePreview(null);
+      setImageFiles([]);
+      setImagePreviews([]);
       setVideoFile(null);
       if (videoPreview) {
         URL.revokeObjectURL(videoPreview);
@@ -600,6 +632,7 @@ export default function CompanyFeed() {
         .insert([{
           content: post.content,
           image_url: post.image_url,
+          image_urls: post.image_urls,
           video_url: post.video_url,
           user_id: currentUserId,
           original_post_id: post.original_post_id || post.id,
@@ -655,7 +688,7 @@ export default function CompanyFeed() {
     }
     
     // Content type filter
-    if (contentFilter === 'images' && !post.image_url) return false;
+    if (contentFilter === 'images' && resolvePostImages(post).length === 0) return false;
     if (contentFilter === 'videos' && !post.video_url) return false;
     
     return true;
@@ -917,17 +950,21 @@ export default function CompanyFeed() {
                     className="mb-4 resize-none"
                     rows={3}
                   />
-                  {imagePreview && (
-                    <div className="relative mb-4">
-                      <img src={imagePreview} alt="Preview" className="rounded-lg w-full object-contain" style={{ maxHeight: '516px' }} />
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        className="absolute top-2 right-2"
-                        onClick={removeImage}
-                      >
-                        <X className="w-4 h-4" />
-                      </Button>
+                  {imagePreviews.length > 0 && (
+                    <div className="grid grid-cols-3 gap-2 mb-4">
+                      {imagePreviews.map((preview, index) => (
+                        <div key={index} className="relative">
+                          <img src={preview} alt={`Preview ${index + 1}`} className="rounded-lg w-full h-32 object-cover" />
+                          <Button
+                            variant="destructive"
+                            size="icon"
+                            className="absolute top-1 right-1 h-6 w-6"
+                            onClick={() => removeImage(index)}
+                          >
+                            <X className="w-3 h-3" />
+                          </Button>
+                        </div>
+                      ))}
                     </div>
                   )}
                   {videoPreview && (
@@ -962,13 +999,14 @@ export default function CompanyFeed() {
                       <input
                         type="file"
                         accept="image/*"
+                        multiple
                         onChange={handleImageSelect}
                         className="hidden"
                         id="image-upload"
                         ref={fileInputRef}
                       />
                       <label htmlFor="image-upload">
-                        <Button variant="outline" size="sm" type="button" asChild title="Add photo (max 8MB)">
+                        <Button variant="outline" size="sm" type="button" asChild title="Add photos (max 8MB each, up to 10)">
                           <span className="cursor-pointer">
                             <ImageIcon className="w-4 h-4 mr-2" />
                             Photo
@@ -1021,7 +1059,7 @@ export default function CompanyFeed() {
                           Clear
                         </Button>
                       )}
-                      <Button onClick={handleCreatePost} disabled={(!newPost.trim() && !imageFile && !videoFile && !documentFile) || posting}>
+                      <Button onClick={handleCreatePost} disabled={(!newPost.trim() && imageFiles.length === 0 && !videoFile && !documentFile) || posting}>
                         {posting ? 'Posting...' : 'Post'}
                       </Button>
                     </div>
@@ -1129,16 +1167,7 @@ export default function CompanyFeed() {
                               )}
                             </div>
                             <MentionText text={post.content} className="mt-3" />
-                            {post.image_url && (
-                              <div className="mt-3 overflow-hidden rounded-lg bg-black/5">
-                                <img
-                                  src={post.image_url}
-                                  alt="Post"
-                                  className="w-full object-contain"
-                                  style={{ maxHeight: '516px' }}
-                                />
-                              </div>
-                            )}
+                            <PostImageGrid images={resolvePostImages(post)} className="mt-3" />
                             {post.video_url && (
                               <video
                                 src={post.video_url}
