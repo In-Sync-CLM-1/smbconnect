@@ -172,7 +172,7 @@ export default function AssociationMembers() {
                 <Button 
                   variant="outline" 
                   size="sm" 
-                  onClick={() => navigate('/association/bulk-upload-users')}
+                  onClick={() => navigate('/association/manage-invitations')}
                 >
                   Bulk Upload
                 </Button>
