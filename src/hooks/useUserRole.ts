@@ -53,16 +53,20 @@ export function useUserRole() {
             .eq('user_id', user.id)
             .eq('is_active', true);
 
-          if (associationDataList && associationDataList.length > 0) {
-            // If selectedAssociationId is provided, try to find matching association
-            // Otherwise, just take the first one
-            const associationData = selectedAssociationId 
-              ? associationDataList.find(a => a.association_id === selectedAssociationId) || associationDataList[0]
-              : associationDataList[0];
-              
+          const matchingManagerRow = selectedAssociationId
+            ? associationDataList?.find(a => a.association_id === selectedAssociationId)
+            : undefined;
+
+          if (associationDataList && associationDataList.length > 0 && (matchingManagerRow || !selectedAssociationId)) {
+            // Use the chosen association; with no choice, take the first one
+            const associationData = matchingManagerRow || associationDataList[0];
+
             setRole('association');
             setUserData({ ...associationData, type: 'association' });
           } else if (selectedAssociationId) {
+            // Chosen association isn't one this user manages directly (e.g. an
+            // admin who manages other associations too): never fall back to a
+            // different association, resolve the chosen one through admin access.
             // Admin users may not be in association_managers but can still manage associations
             const { data: adminData } = await supabase
               .from('admin_users')
