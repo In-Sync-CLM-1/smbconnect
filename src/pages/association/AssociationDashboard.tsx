@@ -605,7 +605,7 @@ export default function AssociationDashboard() {
                 <Upload className="w-4 h-4 mr-2" />
                 Bulk Upload Companies
               </Button>
-              <Button variant="outline" className="w-full" onClick={() => navigate('/association/bulk-upload-users')}>
+              <Button variant="outline" className="w-full" onClick={() => navigate('/association/manage-invitations')}>
                 <Upload className="w-4 h-4 mr-2" />
                 Bulk Upload Users
               </Button>
