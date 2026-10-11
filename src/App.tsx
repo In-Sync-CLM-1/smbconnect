@@ -75,6 +75,7 @@ const CompanyFeed = lazy(() => import("./pages/company/CompanyFeed"));
 const AssociationFeed = lazy(() => import("./pages/association/AssociationFeed"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const AccountSettings = lazy(() => import("./pages/AccountSettings"));
+const OrgEncryption = lazy(() => import("./pages/OrgEncryption"));
 const PrivacyAndData = lazy(() => import("./pages/member/PrivacyAndData"));
 const EventLandingPages = lazy(() => import("./pages/admin/EventLandingPages"));
 const CreateLandingPage = lazy(() => import("./pages/admin/CreateLandingPage"));
@@ -552,6 +553,22 @@ const AppContent = () => {
             element={
               <ProtectedRoute>
                 <AssociationMembers />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/association/encryption"
+            element={
+              <ProtectedRoute>
+                <OrgEncryption orgType="association" />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/company/encryption"
+            element={
+              <ProtectedRoute>
+                <OrgEncryption orgType="company" />
               </ProtectedRoute>
             }
           />
