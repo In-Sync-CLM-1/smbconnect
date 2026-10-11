@@ -53,22 +53,29 @@ export default function MemberCompanies() {
       const user = session?.user;
       if (!user) return;
 
-      const { data: memberData } = await supabase
+      // A member can belong to several associations, so collect every one
+      const { data: memberRows } = await supabase
         .from('members')
-        .select('company_id, companies(association_id)')
+        .select('companies(association_id)')
         .eq('user_id', user.id)
-        .single();
+        .eq('is_active', true);
 
-      if (!memberData) {
+      const associationIds = Array.from(new Set(
+        (memberRows || [])
+          .map((m: any) => m.companies?.association_id)
+          .filter(Boolean)
+      ));
+
+      if (associationIds.length === 0) {
         setLoading(false);
         return;
       }
 
-      // Load all companies in the same association
+      // Load all companies in the member's associations
       const { data, error } = await supabase
         .from('companies')
         .select('*')
-        .eq('association_id', (memberData.companies as any).association_id)
+        .in('association_id', associationIds)
         .order('name');
 
       if (error) throw error;
