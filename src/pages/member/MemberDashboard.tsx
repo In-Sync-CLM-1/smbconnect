@@ -91,18 +91,21 @@ export default function MemberDashboard() {
         setProfile(profileData);
       }
 
-      // Load member data to check company affiliation (use limit(1) to handle duplicate member records)
-      const { data: memberDataArr } = await supabase
+      // A member can belong to several associations: list every one of them
+      const { data: memberRows } = await supabase
         .from('members')
-        .select('*, company:companies(*)')
+        .select('company:companies(name, association:associations(name))')
         .eq('user_id', user.id)
-        .eq('is_active', true)
-        .limit(1);
-      const memberData = memberDataArr?.[0] || null;
+        .eq('is_active', true);
 
-      if (memberData?.company) {
-        // Member has a company
-        setProfile((prev: any) => ({ ...prev, company: memberData.company }));
+      const memberOf = Array.from(new Set(
+        (memberRows || [])
+          .map((m: any) => m.company?.association?.name || m.company?.name)
+          .filter(Boolean)
+      )) as string[];
+
+      if (memberOf.length > 0) {
+        setProfile((prev: any) => ({ ...prev, memberOf }));
       }
     } catch (error: any) {
       console.error('Error loading profile:', error);
@@ -168,8 +171,8 @@ export default function MemberDashboard() {
             Welcome back, {profile?.first_name || 'User'}!
           </h2>
           <p className="text-muted-foreground">
-            {profile?.company 
-              ? `You're part of ${profile.company.name}` 
+            {profile?.memberOf?.length
+              ? `You're part of ${profile.memberOf.join(', ')}`
               : 'Independent member - Connect with others in your network'}
           </p>
         </div>
