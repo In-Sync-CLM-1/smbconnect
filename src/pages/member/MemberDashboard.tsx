@@ -94,15 +94,16 @@ export default function MemberDashboard() {
       // A member can belong to several associations: list every one of them
       const { data: memberRows } = await supabase
         .from('members')
-        .select('company:companies(name, association:associations(name))')
+        .select('company:companies(name, association:associations(id, name, logo))')
         .eq('user_id', user.id)
         .eq('is_active', true);
 
-      const memberOf = Array.from(new Set(
-        (memberRows || [])
-          .map((m: any) => m.company?.association?.name || m.company?.name)
-          .filter(Boolean)
-      )) as string[];
+      const byId = new Map<string, { id: string; name: string; logo: string | null }>();
+      (memberRows || []).forEach((m: any) => {
+        const assoc = m.company?.association;
+        if (assoc?.id) byId.set(assoc.id, assoc);
+      });
+      const memberOf = Array.from(byId.values()).sort((x, y) => x.name.localeCompare(y.name));
 
       if (memberOf.length > 0) {
         setProfile((prev: any) => ({ ...prev, memberOf }));
@@ -172,7 +173,7 @@ export default function MemberDashboard() {
           </h2>
           <p className="text-muted-foreground">
             {profile?.memberOf?.length
-              ? `You're part of ${profile.memberOf.join(', ')}`
+              ? `You're part of ${profile.memberOf.map((a: any) => a.name).join(', ')}`
               : 'Independent member - Connect with others in your network'}
           </p>
         </div>
@@ -291,6 +292,30 @@ export default function MemberDashboard() {
             )}
           </CardContent>
         </Card>
+
+        {profile?.memberOf?.length > 0 && (
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle>My Associations</CardTitle>
+              <CardDescription>Associations you belong to</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {profile.memberOf.map((association: any) => (
+                  <Button
+                    key={association.id}
+                    variant="outline"
+                    className="w-full justify-start"
+                    onClick={() => navigate(`/member/associations/${association.id}`)}
+                  >
+                    <Building className="w-4 h-4 mr-2" />
+                    {association.name}
+                  </Button>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Quick Actions */}
         <Card>
