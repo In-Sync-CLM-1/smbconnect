@@ -19,10 +19,8 @@ serve(async (req) => {
     if (!authHeader) return json({ error: "Unauthorized" }, 401);
 
     const url = Deno.env.get("SUPABASE_URL")!;
-    const userClient = createClient(url, Deno.env.get("SUPABASE_ANON_KEY") ?? Deno.env.get("SUPABASE_PUBLISHABLE_KEY")!, {
-      global: { headers: { Authorization: authHeader } },
-    });
-    const { data: userData, error: userErr } = await userClient.auth.getUser();
+    const admin = createClient(url, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+    const { data: userData, error: userErr } = await admin.auth.getUser(authHeader.replace("Bearer ", ""));
     if (userErr || !userData.user) return json({ error: "Unauthorized" }, 401);
 
     const { org_type, org_id, action, encryption_key } = await req.json();
@@ -31,7 +29,6 @@ serve(async (req) => {
     }
     if (action !== "save" && action !== "remove") return json({ error: "Unknown action" }, 400);
 
-    const admin = createClient(url, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
     const { data: allowed, error: roleErr } = await admin.rpc(
       org_type === "association" ? "is_association_manager" : "is_company_admin",
       { check_user_id: userData.user.id, [org_type === "association" ? "check_association_id" : "check_company_id"]: org_id },
