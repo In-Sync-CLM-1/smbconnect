@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Building2, Users, LogOut, Settings, Radio, Calendar, GraduationCap, CheckCircle2, Clock, TrendingUp, Upload, UserPlus, Mail, BarChart3, Link2, IndianRupee, FileText, TicketPercent } from 'lucide-react';
+import { Building2, Users, LogOut, Settings, Radio, Calendar, GraduationCap, CheckCircle2, Clock, TrendingUp, Upload, UserPlus, Mail, BarChart3, Link2, IndianRupee, FileText, TicketPercent, KeyRound } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useUserRole } from '@/hooks/useUserRole';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -574,6 +574,10 @@ export default function AssociationDashboard() {
               <Button variant="outline" className="w-full" onClick={() => navigate('/association/profile')}>
                 <Settings className="w-4 h-4 mr-2" />
                 Association Profile
+              </Button>
+              <Button variant="outline" className="w-full" onClick={() => navigate('/association/encryption')}>
+                <KeyRound className="w-4 h-4 mr-2" />
+                Data Encryption Key
               </Button>
               <Button className="w-full" onClick={() => setInviteLinkDialogOpen(true)} disabled={!association}>
                 <Link2 className="w-4 h-4 mr-2" />
