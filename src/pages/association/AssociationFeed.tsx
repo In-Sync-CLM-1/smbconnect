@@ -29,6 +29,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useRoleContext } from '@/contexts/RoleContext';
 import { PostImageGrid, resolvePostImages } from '@/components/post/PostImageGrid';
+import { useUrlState } from '@/hooks/useUrlState';
 
 interface Post {
   id: string;
@@ -100,9 +101,9 @@ export default function AssociationFeed() {
   const [profile, setProfile] = useState<any>(null);
   const [associationInfo, setAssociationInfo] = useState<AssociationInfo | null>(null);
   const [pendingConnectionsCount, setPendingConnectionsCount] = useState(0);
-  const [activeTab, setActiveTab] = useState<'posts' | 'about' | 'members' | 'companies'>('posts');
-  const [contentFilter, setContentFilter] = useState<'all' | 'images' | 'videos'>('all');
-  const [sortBy, setSortBy] = useState<'recent' | 'top'>('recent');
+  const [activeTab, setActiveTab] = useUrlState<'posts' | 'about' | 'members' | 'companies'>('tab', 'posts');
+  const [contentFilter, setContentFilter] = useUrlState<'all' | 'images' | 'videos'>('content', 'all');
+  const [sortBy, setSortBy] = useUrlState<'recent' | 'top'>('sort', 'recent');
   const [showEditProfile, setShowEditProfile] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);

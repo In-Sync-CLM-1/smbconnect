@@ -7,6 +7,7 @@ import { Search, Building, MapPin, Calendar } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { HomeButton } from "@/components/HomeButton";
 import { toast } from "sonner";
+import { useUrlState } from "@/hooks/useUrlState";
 
 interface Association {
   id: string;
@@ -24,7 +25,7 @@ export default function BrowseAssociations() {
   const navigate = useNavigate();
   const [associations, setAssociations] = useState<Association[]>([]);
   const [filteredAssociations, setFilteredAssociations] = useState<Association[]>([]);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useUrlState("q", "");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

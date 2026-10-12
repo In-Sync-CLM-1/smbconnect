@@ -36,6 +36,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { useUrlState } from "@/hooks/useUrlState";
 
 interface Coupon {
   id: string;
@@ -57,8 +58,8 @@ interface Coupon {
 }
 
 export default function CouponManagement() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "expired" | "inactive">("all");
+  const [searchQuery, setSearchQuery] = useUrlState("q", "");
+  const [statusFilter, setStatusFilter] = useUrlState<"all" | "active" | "expired" | "inactive">("status", "all");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [editingCoupon, setEditingCoupon] = useState<Coupon | null>(null);
   const [deletingCoupon, setDeletingCoupon] = useState<Coupon | null>(null);

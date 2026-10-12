@@ -33,6 +33,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { useUrlState } from '@/hooks/useUrlState';
 
 interface User {
   id: string;
@@ -70,15 +71,15 @@ export default function UserManagement() {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [loading, setLoading] = useState(true);
   const [searching, setSearching] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [page, setPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useUrlState('q', '');
+  const [page, setPage] = useUrlState('page', 1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalUsers, setTotalUsers] = useState(0);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [roleType, setRoleType] = useState<string>('');
-  const [selectedAssociation, setSelectedAssociation] = useState<string>('');
-  const [selectedCompany, setSelectedCompany] = useState<string>('');
-  const [memberRole, setMemberRole] = useState<string>('member');
+  const [roleType, setRoleType] = useUrlState<string>('role', '');
+  const [selectedAssociation, setSelectedAssociation] = useUrlState<string>('assoc', '');
+  const [selectedCompany, setSelectedCompany] = useUrlState<string>('company', '');
+  const [memberRole, setMemberRole] = useUrlState<string>('mrole', 'member');
   const [deletingUser, setDeletingUser] = useState<User | null>(null);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [deletePassword, setDeletePassword] = useState('');
@@ -89,12 +90,12 @@ export default function UserManagement() {
   const [hardDeletePassword, setHardDeletePassword] = useState('');
   const [hardDeleteNotes, setHardDeleteNotes] = useState('');
   const [showHardDeleteDialog, setShowHardDeleteDialog] = useState(false);
-  const [itemsPerPage, setItemsPerPage] = useState(20);
+  const [itemsPerPage, setItemsPerPage] = useUrlState('ipp', 20);
   const [resetPasswordUser, setResetPasswordUser] = useState<User | null>(null);
   const [resetMethod, setResetMethod] = useState<'email' | 'manual'>('email');
   const [newPassword, setNewPassword] = useState('');
   const [showResetPasswordDialog, setShowResetPasswordDialog] = useState(false);
-  const [timeRange, setTimeRange] = useState<'7d' | '30d' | '90d' | 'all'>('30d');
+  const [timeRange, setTimeRange] = useUrlState<'7d' | '30d' | '90d' | 'all'>('range', '30d');
   const [loginActivity, setLoginActivity] = useState<LoginActivityPoint[]>([]);
   const [loginActivityLoading, setLoginActivityLoading] = useState(false);
   const { toast } = useToast();

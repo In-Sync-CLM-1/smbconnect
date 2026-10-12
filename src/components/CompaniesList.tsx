@@ -27,6 +27,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { useUrlState } from '@/hooks/useUrlState';
 
 interface Company {
   id: string;
@@ -58,7 +59,7 @@ export function CompaniesList({ onSelectionChange, selectedIds = [] }: Companies
   const [filteredCompanies, setFilteredCompanies] = useState<Company[]>([]);
   const [displayedCompanies, setDisplayedCompanies] = useState<Company[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useUrlState('compq', '');
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [deletingCompany, setDeletingCompany] = useState<Company | null>(null);
@@ -66,7 +67,7 @@ export function CompaniesList({ onSelectionChange, selectedIds = [] }: Companies
   const [deletePassword, setDeletePassword] = useState('');
   const [deleteNotes, setDeleteNotes] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
-  const [viewMode, setViewMode] = useState<'card' | 'table'>('card');
+  const [viewMode, setViewMode] = useUrlState<'card' | 'table'>('compview', 'card');
   const [hardDeletingCompany, setHardDeletingCompany] = useState<Company | null>(null);
   const [hardDeletePassword, setHardDeletePassword] = useState('');
   const [hardDeleteNotes, setHardDeleteNotes] = useState('');

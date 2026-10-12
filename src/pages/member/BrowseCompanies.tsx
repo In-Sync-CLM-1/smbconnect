@@ -7,6 +7,7 @@ import { Search, Building2, MapPin, Users, Calendar } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { HomeButton } from "@/components/HomeButton";
 import { toast } from "sonner";
+import { useUrlState } from "@/hooks/useUrlState";
 
 interface Company {
   id: string;
@@ -25,7 +26,7 @@ export default function BrowseCompanies() {
   const navigate = useNavigate();
   const [companies, setCompanies] = useState<Company[]>([]);
   const [filteredCompanies, setFilteredCompanies] = useState<Company[]>([]);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useUrlState("q", "");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

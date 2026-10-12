@@ -24,6 +24,8 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Loader2, Search, Download, Users, Clock, CheckCircle, XCircle, Link2 } from 'lucide-react';
 import { format } from 'date-fns';
+import { useUrlState } from '@/hooks/useUrlState';
+import { UrlTabs } from '@/components/UrlTabs';
 
 interface Profile {
   id: string;
@@ -66,8 +68,8 @@ const STATUS_OPTIONS = ['all', 'pending', 'accepted', 'rejected', 'blocked'] as 
 export default function MemberConnectionRequests() {
   const [connections, setConnections] = useState<ConnectionRow[]>([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [search, setSearch] = useUrlState('q', '');
+  const [statusFilter, setStatusFilter] = useUrlState<string>('status', 'all');
 
   useEffect(() => {
     loadConnections();
@@ -324,7 +326,7 @@ export default function MemberConnectionRequests() {
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         </div>
       ) : (
-        <Tabs defaultValue="report">
+        <UrlTabs param="memberconnectionrequests_tab" defaultValue="report">
           <TabsList>
             <TabsTrigger value="report">Connect Requests Report</TabsTrigger>
             <TabsTrigger value="all">All Requests</TabsTrigger>
@@ -479,7 +481,7 @@ export default function MemberConnectionRequests() {
               Showing {filtered.length} of {stats.total} connection requests
             </p>
           </TabsContent>
-        </Tabs>
+        </UrlTabs>
       )}
     </div>
   );

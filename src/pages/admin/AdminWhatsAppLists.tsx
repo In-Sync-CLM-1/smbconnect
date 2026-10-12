@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { Checkbox } from "@/components/ui/checkbox";
 import CreateWhatsAppListDialog from "@/components/admin/CreateWhatsAppListDialog";
 import BulkWhatsAppDialog from "@/components/admin/BulkWhatsAppDialog";
+import { useUrlState } from "@/hooks/useUrlState";
 
 interface WhatsAppList {
   id: string;
@@ -22,7 +23,7 @@ const AdminWhatsAppLists = () => {
   const navigate = useNavigate();
   const [lists, setLists] = useState<WhatsAppList[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useUrlState("q", "");
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showBulkDialog, setShowBulkDialog] = useState(false);
   const [selectedLists, setSelectedLists] = useState<string[]>([]);

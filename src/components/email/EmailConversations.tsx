@@ -10,6 +10,7 @@ import { EmailComposer } from './EmailComposer';
 import { EmailThread } from './EmailThread';
 import { Mail, Plus, Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useUrlState } from '@/hooks/useUrlState';
 
 interface EmailConversationsProps {
   userType: 'association' | 'company';
@@ -39,7 +40,7 @@ export function EmailConversations({
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useUrlState('eq', '');
   const [composeOpen, setComposeOpen] = useState(false);
 
   useEffect(() => {

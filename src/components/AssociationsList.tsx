@@ -28,6 +28,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { useUrlState } from '@/hooks/useUrlState';
 
 interface Association {
   id: string;
@@ -54,7 +55,7 @@ export function AssociationsList({ onSelectionChange, selectedIds = [] }: Associ
   const [filteredAssociations, setFilteredAssociations] = useState<Association[]>([]);
   const [displayedAssociations, setDisplayedAssociations] = useState<Association[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useUrlState('assocq', '');
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [editingAssociation, setEditingAssociation] = useState<Association | null>(null);
@@ -63,7 +64,7 @@ export function AssociationsList({ onSelectionChange, selectedIds = [] }: Associ
   const [deletePassword, setDeletePassword] = useState('');
   const [deleteNotes, setDeleteNotes] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
-  const [viewMode, setViewMode] = useState<'card' | 'table'>('card');
+  const [viewMode, setViewMode] = useUrlState<'card' | 'table'>('assocview', 'card');
   const [hardDeletingAssociation, setHardDeletingAssociation] = useState<Association | null>(null);
   const [hardDeletePassword, setHardDeletePassword] = useState('');
   const [hardDeleteNotes, setHardDeleteNotes] = useState('');

@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { ArrowLeft, Building, Mail, Phone, Globe, MapPin, Search } from 'lucide-react';
 import { toast } from 'sonner';
 import { useUserRole } from '@/hooks/useUserRole';
+import { useUrlState } from '@/hooks/useUrlState';
 
 interface Company {
   id: string;
@@ -29,7 +30,7 @@ export default function AssociationCompanies() {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [filteredCompanies, setFilteredCompanies] = useState<Company[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useUrlState('q', '');
 
   useEffect(() => {
     if (userData?.association) {

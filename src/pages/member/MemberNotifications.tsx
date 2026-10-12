@@ -11,6 +11,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { MobileNavigation } from '@/components/layout/MobileNavigation';
 import { BackButton } from '@/components/BackButton';
+import { useUrlState } from '@/hooks/useUrlState';
 
 const getNotificationIcon = (type: string) => {
   switch (type) {
@@ -34,7 +35,7 @@ const getNotificationIcon = (type: string) => {
 export default function MemberNotifications() {
   const navigate = useNavigate();
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-  const [filter, setFilter] = useState<'all' | 'unread'>('all');
+  const [filter, setFilter] = useUrlState<'all' | 'unread'>('filter', 'all');
 
   useEffect(() => {
     const getUser = async () => {
