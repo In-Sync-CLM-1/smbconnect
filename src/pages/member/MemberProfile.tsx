@@ -52,6 +52,7 @@ import { EditSkillsDialog } from '@/components/member/EditSkillsDialog';
 import { EditCertificationsDialog } from '@/components/member/EditCertificationsDialog';
 import { ManageCertificationDialog } from '@/components/member/ManageCertificationDialog';
 import { MobileNavigation } from '@/components/layout/MobileNavigation';
+import { useUrlState } from '@/hooks/useUrlState';
 
 interface ProfileData {
   id: string;
@@ -162,7 +163,7 @@ export default function MemberProfile() {
   const [chatId, setChatId] = useState<string | null>(null);
   const [chatOpen, setChatOpen] = useState(false);
   const [connectionCount, setConnectionCount] = useState(0);
-  const [activeTab, setActiveTab] = useState<'posts' | 'saved' | 'about'>('posts');
+  const [activeTab, setActiveTab] = useUrlState<'posts' | 'saved' | 'about'>('tab', 'posts');
   const [userPosts, setUserPosts] = useState<ProfilePost[]>([]);
   const [postsLoading, setPostsLoading] = useState(true);
   const [showComments, setShowComments] = useState<Set<string>>(new Set());

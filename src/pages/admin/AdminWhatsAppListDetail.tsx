@@ -15,6 +15,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useUrlState } from "@/hooks/useUrlState";
 
 interface Recipient {
   id: string;
@@ -30,7 +31,7 @@ const AdminWhatsAppListDetail = () => {
   const [recipients, setRecipients] = useState<Recipient[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useUrlState("q", "");
 
   useEffect(() => {
     if (listId) {

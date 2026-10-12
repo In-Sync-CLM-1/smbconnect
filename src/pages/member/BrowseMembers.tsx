@@ -17,6 +17,8 @@ import { useUserRole } from '@/hooks/useUserRole';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { RoleNavigation } from '@/components/RoleNavigation';
 import { MobileNavigation } from '@/components/layout/MobileNavigation';
+import { useUrlState } from '@/hooks/useUrlState';
+import { useUrlObjectState } from '@/hooks/useUrlState';
 
 interface Member {
   id: string;
@@ -87,7 +89,7 @@ export default function BrowseMembers() {
   const [loading, setLoading] = useState(true);
   const [members, setMembers] = useState<Member[]>([]);
   const [filteredMembers, setFilteredMembers] = useState<Member[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useUrlState('q', '');
   const [selectedMember, setSelectedMember] = useState<Member | null>(null);
   const [connectionMessage, setConnectionMessage] = useState('');
   const [sendingRequest, setSendingRequest] = useState(false);
@@ -97,18 +99,18 @@ export default function BrowseMembers() {
   // Filter states
   const [associations, setAssociations] = useState<Association[]>([]);
   const [companies, setCompanies] = useState<Company[]>([]);
-  const [selectedAssociation, setSelectedAssociation] = useState<string>('');
-  const [selectedCompany, setSelectedCompany] = useState<string>('');
-  const [minEmployees, setMinEmployees] = useState<string>('');
-  const [maxEmployees, setMaxEmployees] = useState<string>('');
-  const [minTurnover, setMinTurnover] = useState<string>('');
-  const [maxTurnover, setMaxTurnover] = useState<string>('');
-  const [selectedCity, setSelectedCity] = useState<string>('');
-  const [selectedState, setSelectedState] = useState<string>('');
-  const [selectedCountry, setSelectedCountry] = useState<string>('');
+  const [selectedAssociation, setSelectedAssociation] = useUrlState<string>('assoc', '');
+  const [selectedCompany, setSelectedCompany] = useUrlState<string>('company', '');
+  const [minEmployees, setMinEmployees] = useUrlState<string>('minemp', '');
+  const [maxEmployees, setMaxEmployees] = useUrlState<string>('maxemp', '');
+  const [minTurnover, setMinTurnover] = useUrlState<string>('minturn', '');
+  const [maxTurnover, setMaxTurnover] = useUrlState<string>('maxturn', '');
+  const [selectedCity, setSelectedCity] = useUrlState<string>('city', '');
+  const [selectedState, setSelectedState] = useUrlState<string>('state', '');
+  const [selectedCountry, setSelectedCountry] = useUrlState<string>('country', '');
 
   // Snapshot of the criteria actually being applied. Updated only on Search/Enter/Clear.
-  const [appliedFilters, setAppliedFilters] = useState<AppliedFilters>(EMPTY_FILTERS);
+  const [appliedFilters, setAppliedFilters] = useUrlObjectState<AppliedFilters>('af', EMPTY_FILTERS);
 
   useEffect(() => {
     if (!userLoading && userData) {

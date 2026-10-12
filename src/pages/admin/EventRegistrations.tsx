@@ -35,6 +35,7 @@ import {
 import { ArrowLeft, Download, Search, Eye, Loader2, BarChart3, Users, TrendingUp, GraduationCap, CheckCircle2, Clock } from 'lucide-react';
 import { format } from 'date-fns';
 import { Json } from '@/integrations/supabase/types';
+import { useUrlState } from '@/hooks/useUrlState';
 
 interface Registration {
   id: string;
@@ -67,14 +68,14 @@ const EventRegistrations = () => {
   const navigate = useNavigate();
   const { userId } = useAuth();
   const scope = useOwnershipScope();
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useUrlState('q', '');
   const [selectedRegistration, setSelectedRegistration] = useState<Registration | null>(null);
-  const [utmSourceFilter, setUtmSourceFilter] = useState<string>('all');
-  const [utmMediumFilter, setUtmMediumFilter] = useState<string>('all');
-  const [utmCampaignFilter, setUtmCampaignFilter] = useState<string>('all');
-  const [activeTab, setActiveTab] = useState('registrations');
-  const [onboardingSearch, setOnboardingSearch] = useState('');
-  const [onboardingFilter, setOnboardingFilter] = useState<'all' | 'completed' | 'pending'>('all');
+  const [utmSourceFilter, setUtmSourceFilter] = useUrlState<string>('src', 'all');
+  const [utmMediumFilter, setUtmMediumFilter] = useUrlState<string>('medium', 'all');
+  const [utmCampaignFilter, setUtmCampaignFilter] = useUrlState<string>('campaign', 'all');
+  const [activeTab, setActiveTab] = useUrlState('tab', 'registrations');
+  const [onboardingSearch, setOnboardingSearch] = useUrlState('oq', '');
+  const [onboardingFilter, setOnboardingFilter] = useUrlState<'all' | 'completed' | 'pending'>('ofilter', 'all');
 
   const { data: landingPage, isLoading: isLoadingPage } = useQuery({
     queryKey: ['landing-page', id],

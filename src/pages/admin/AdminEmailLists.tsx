@@ -11,6 +11,7 @@ import { BulkEmailDialog } from '@/components/admin/BulkEmailDialog';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useRoleContext } from '@/contexts/RoleContext';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useUrlState } from '@/hooks/useUrlState';
 
 interface EmailList {
   id: string;
@@ -27,7 +28,7 @@ export default function AdminEmailLists() {
   const { selectedAssociationId, setRole } = useRoleContext();
   const [lists, setLists] = useState<EmailList[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useUrlState('q', '');
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [bulkEmailDialog, setBulkEmailDialog] = useState<{ open: boolean; listIds: string[] }>({ 
     open: false, 

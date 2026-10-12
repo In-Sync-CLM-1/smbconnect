@@ -38,6 +38,7 @@ import {
   Users,
   Building,
 } from "lucide-react";
+import { useUrlState } from "@/hooks/useUrlState";
 
 interface Association {
   id: string;
@@ -116,14 +117,14 @@ export default function AssociationProfileView() {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   // Tabs
-  const [activeTab, setActiveTab] = useState<"posts" | "about" | "members" | "companies">("posts");
+  const [activeTab, setActiveTab] = useUrlState<"posts" | "about" | "members" | "companies">("tab", "posts");
 
   // Posts
   const [posts, setPosts] = useState<Post[]>([]);
   const [postsLoading, setPostsLoading] = useState(true);
   const [showComments, setShowComments] = useState<Record<string, boolean>>({});
-  const [contentFilter, setContentFilter] = useState<"all" | "images" | "videos">("all");
-  const [sortBy, setSortBy] = useState<"recent" | "top">("recent");
+  const [contentFilter, setContentFilter] = useUrlState<"all" | "images" | "videos">("content", "all");
+  const [sortBy, setSortBy] = useUrlState<"recent" | "top">("sort", "recent");
 
   // Counts
   const [memberCount, setMemberCount] = useState(0);

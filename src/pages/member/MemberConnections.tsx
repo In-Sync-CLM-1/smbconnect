@@ -8,6 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ArrowLeft, Check, X, Users } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { MobileNavigation } from '@/components/layout/MobileNavigation';
+import { UrlTabs } from '@/components/UrlTabs';
 
 interface ConnectionWithDetails {
   id: string;
@@ -317,7 +318,7 @@ export default function MemberConnections() {
           </Button>
         </div>
 
-        <Tabs defaultValue="connections" className="w-full">
+        <UrlTabs param="memberconnections_tab" defaultValue="connections" className="w-full">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="connections">
               Connections ({connections.length})
@@ -371,7 +372,7 @@ export default function MemberConnections() {
               pendingSent.map(conn => renderConnectionCard(conn, 'cancel'))
             )}
           </TabsContent>
-        </Tabs>
+        </UrlTabs>
       </main>
       
       <MobileNavigation />

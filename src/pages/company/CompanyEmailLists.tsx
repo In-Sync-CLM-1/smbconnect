@@ -9,6 +9,7 @@ import { ArrowLeft, Plus, Mail, Trash2, Users } from 'lucide-react';
 import { CreateEmailListDialog } from '@/components/admin/CreateEmailListDialog';
 import { BulkEmailDialog } from '@/components/admin/BulkEmailDialog';
 import { useUserRole } from '@/hooks/useUserRole';
+import { useUrlState } from '@/hooks/useUrlState';
 
 interface EmailList {
   id: string;
@@ -24,7 +25,7 @@ export default function CompanyEmailLists() {
   const { role, userData } = useUserRole();
   const [lists, setLists] = useState<EmailList[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useUrlState('q', '');
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [bulkEmailDialog, setBulkEmailDialog] = useState<{ open: boolean; listIds: string[] }>({ 
     open: false, 

@@ -28,6 +28,7 @@ import { BackButton } from '@/components/BackButton';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { PostImageGrid, resolvePostImages } from '@/components/post/PostImageGrid';
+import { useUrlState } from '@/hooks/useUrlState';
 
 interface Post {
   id: string;
@@ -99,9 +100,9 @@ export default function CompanyFeed() {
   const [companyInfo, setCompanyInfo] = useState<CompanyInfo | null>(null);
   const [showEditProfile, setShowEditProfile] = useState(false);
   const [pendingConnectionsCount, setPendingConnectionsCount] = useState(0);
-  const [activeTab, setActiveTab] = useState<'posts' | 'about' | 'members'>('posts');
-  const [contentFilter, setContentFilter] = useState<'all' | 'images' | 'videos'>('all');
-  const [sortBy, setSortBy] = useState<'recent' | 'top'>('recent');
+  const [activeTab, setActiveTab] = useUrlState<'posts' | 'about' | 'members'>('tab', 'posts');
+  const [contentFilter, setContentFilter] = useUrlState<'all' | 'images' | 'videos'>('content', 'all');
+  const [sortBy, setSortBy] = useUrlState<'recent' | 'top'>('sort', 'recent');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
   const documentInputRef = useRef<HTMLInputElement>(null);

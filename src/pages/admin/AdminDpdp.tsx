@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BackButton } from '@/components/BackButton';
 import { Shield, ShieldAlert, AlertTriangle, Download, Eye, CheckCircle } from 'lucide-react';
 import { DATA_REQUEST_TYPE_LABELS, GRIEVANCE_EMAIL } from '@/lib/dpdp';
+import { UrlTabs } from '@/components/UrlTabs';
 
 const REQUEST_STATUSES = ['pending', 'in_progress', 'completed', 'rejected'];
 
@@ -129,7 +130,7 @@ export default function AdminDpdp() {
           </div>
         </div>
 
-        <Tabs defaultValue="requests">
+        <UrlTabs param="admindpdp_tab" defaultValue="requests">
           <TabsList>
             <TabsTrigger value="requests">
               Data Requests{pendingCount > 0 && <Badge className="ml-2">{pendingCount}</Badge>}
@@ -289,7 +290,7 @@ export default function AdminDpdp() {
               </CardContent>
             </Card>
           </TabsContent>
-        </Tabs>
+        </UrlTabs>
       </div>
     </div>
   );
