@@ -56,16 +56,17 @@ serve(async (req) => {
       .select('id')
     if (!consumed || consumed.length === 0) throw new Error('This code was already used. Please request a new one.')
 
-    const { data: profile } = await admin.from('profiles').select('id').ilike('email', email).maybeSingle()
-    if (!profile) throw new Error('Account not found')
+    const { data: existing } = await admin.rpc('signup_lookup_user', { p_email: email })
+    const account = Array.isArray(existing) ? existing[0] : existing
+    if (!account) throw new Error('Account not found')
 
-    const { error: confirmError } = await admin.auth.admin.updateUserById(profile.id, { email_confirm: true })
+    const { error: confirmError } = await admin.auth.admin.updateUserById(account.id, { email_confirm: true })
     if (confirmError) throw new Error('Failed to activate your account')
 
     const { data: linkData, error: linkError } = await admin.auth.admin.generateLink({ type: 'magiclink', email })
     if (linkError || !linkData?.properties?.hashed_token) throw new Error('Failed to start your session')
 
-    return json({ success: true, userId: profile.id, tokenHash: linkData.properties.hashed_token })
+    return json({ success: true, userId: account.id, tokenHash: linkData.properties.hashed_token })
   } catch (error: any) {
     return json({ error: error.message }, 400)
   }

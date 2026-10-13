@@ -28,14 +28,11 @@ serve(async (req) => {
       { auth: { autoRefreshToken: false, persistSession: false } },
     )
 
-    // Look up an existing account by profile email (profiles are created by the auth.users trigger).
-    const { data: profile } = await admin.from('profiles').select('id').ilike('email', email).maybeSingle()
-    let userId: string | null = profile?.id ?? null
-    let confirmed = false
-    if (userId) {
-      const { data } = await admin.auth.admin.getUserById(userId)
-      confirmed = !!data?.user?.email_confirmed_at
-    }
+    // Find an existing account through the sign-in records (profiles do not store the email).
+    const { data: existing } = await admin.rpc('signup_lookup_user', { p_email: email })
+    const found = Array.isArray(existing) ? existing[0] : existing
+    let userId: string | null = found?.id ?? null
+    const confirmed = !!found?.confirmed
 
     if (confirmed) throw new Error('An account with this email already exists. Please sign in.')
 
