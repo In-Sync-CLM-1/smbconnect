@@ -12,6 +12,8 @@ import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle, CheckCircle, Loader2 } from 'lucide-react';
 import logo from '@/assets/smb-connect-logo.jpg';
+import { sendSignupCode } from '@/lib/signupOtp';
+import { SignupCodeEntry } from '@/components/auth/SignupCodeEntry';
 
 const signupSchema = z.object({
   firstName: z.string().min(1, 'First name is required'),
@@ -48,6 +50,7 @@ export default function AcceptInvitation() {
   const [invitation, setInvitation] = useState<InvitationData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [currentUser, setCurrentUser] = useState<any>(null);
+  const [codeStep, setCodeStep] = useState(false);
 
   const {
     register,
@@ -149,24 +152,15 @@ export default function AcceptInvitation() {
     try {
       setSubmitting(true);
 
-      // Sign up new user
-      const { data: authData, error: signupError } = await supabase.auth.signUp({
+      // Create the account and email a 6-digit code; the invitation is accepted once the code is verified.
+      await sendSignupCode({
         email: invitation.email,
         password: formData.password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/`,
-          data: {
-            first_name: formData.firstName,
-            last_name: formData.lastName,
-          },
-        },
+        firstName: formData.firstName,
+        lastName: formData.lastName,
       });
-
-      if (signupError) throw signupError;
-      if (!authData.user) throw new Error('Failed to create user account.');
-
-      // Accept invitation
-      await acceptInvitation(invitation, authData.user.id);
+      setCodeStep(true);
+      setSubmitting(false);
     } catch (err: any) {
       toast({
         title: 'Error',
@@ -208,6 +202,30 @@ export default function AcceptInvitation() {
                 <Button variant="outline">Go to Login</Button>
               </Link>
             </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (codeStep && invitation) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <div className="flex justify-center mb-4">
+              <img src={logo} alt="SMB Connect" className="h-16 object-contain" />
+            </div>
+            <CardTitle>Verify your email</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <SignupCodeEntry
+              email={invitation.email}
+              onVerified={(userId) => {
+                setCodeStep(false);
+                return acceptInvitation(invitation, userId);
+              }}
+            />
           </CardContent>
         </Card>
       </div>

@@ -15,6 +15,8 @@ import logo from '@/assets/smb-connect-logo.jpg';
 import { PolicyFooterLinks } from '@/components/PolicyLayout';
 import { DpdpConsent } from '@/components/dpdp/DpdpConsent';
 import { CONSENT_PURPOSE, recordConsent } from '@/lib/dpdp';
+import { sendSignupCode } from '@/lib/signupOtp';
+import { SignupCodeEntry } from '@/components/auth/SignupCodeEntry';
 
 const registerSchema = z.object({
   firstName: z.string().min(2, 'First name must be at least 2 characters'),
@@ -33,6 +35,7 @@ type RegisterFormData = z.infer<typeof registerSchema>;
 export default function Register() {
   const [loading, setLoading] = useState(false);
   const [consented, setConsented] = useState(false);
+  const [pendingEmail, setPendingEmail] = useState<string | null>(null);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
@@ -53,39 +56,18 @@ export default function Register() {
     try {
       setLoading(true);
       const normalizedEmail = data.email.trim().toLowerCase();
-      const { data: signUpData, error } = await supabase.auth.signUp({
+      await sendSignupCode({
         email: normalizedEmail,
         password: data.password,
-        options: {
-          emailRedirectTo: window.location.origin,
-          data: {
-            first_name: data.firstName,
-            last_name: data.lastName,
-            phone: data.phone,
-          },
-        },
+        firstName: data.firstName,
+        lastName: data.lastName,
+        phone: data.phone,
       });
-
-      if (error) throw error;
 
       // DPDP: store proof of the consent the user just gave (best-effort).
       await recordConsent(normalizedEmail, CONSENT_PURPOSE.registration);
 
-      if (!signUpData.session) {
-        toast({
-          title: 'Check your email',
-          description: `We sent a confirmation link to ${normalizedEmail}. Click it to activate your account, then sign in.`,
-        });
-        navigate(redirectTo ? `/auth/login?redirect=${encodeURIComponent(redirectTo)}` : '/auth/login');
-        return;
-      }
-
-      toast({
-        title: 'Success',
-        description: 'Your account has been created successfully',
-      });
-
-      navigate(redirectTo || '/dashboard');
+      setPendingEmail(normalizedEmail);
     } catch (error: any) {
       toast({
         title: 'Error',
@@ -95,6 +77,14 @@ export default function Register() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleVerified = () => {
+    toast({
+      title: 'Success',
+      description: 'Your account has been created successfully',
+    });
+    navigate(redirectTo || '/dashboard');
   };
 
   const handleGoogleSignUp = async () => {
@@ -131,6 +121,9 @@ export default function Register() {
           </CardDescription>
         </CardHeader>
         <CardContent>
+          {pendingEmail ? (
+            <SignupCodeEntry email={pendingEmail} onVerified={handleVerified} />
+          ) : (<>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -264,6 +257,7 @@ export default function Register() {
             </svg>
             Continue with Google
           </Button>
+          </>)}
         </CardContent>
         <CardFooter className="flex flex-col space-y-2">
           <div className="text-sm text-center text-muted-foreground">

@@ -83,3 +83,9 @@ verify_jwt = false
 
 [functions.set-org-encryption-key]
 verify_jwt = false
+
+[functions.signup-send-otp]
+verify_jwt = false
+
+[functions.signup-verify-otp]
+verify_jwt = false
