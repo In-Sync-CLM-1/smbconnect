@@ -50,6 +50,7 @@ import { BookmarkButton } from '@/components/post/BookmarkButton';
 import { PostEngagementBadge } from '@/components/post/PostEngagementBadge';
 import { formatDistanceToNow } from 'date-fns';
 import { PostImageGrid, resolvePostImages } from '@/components/post/PostImageGrid';
+import { getInitials } from '@/lib/formatters';
 
 interface Post {
   id: string;
@@ -1131,7 +1132,7 @@ export default function MemberFeed() {
                 : `${post.profile.first_name} ${post.profile.last_name}`;
               const initials = isOrgPost
                 ? orgName.substring(0, 2).toUpperCase()
-                : `${post.profile.first_name[0]}${post.profile.last_name[0]}`;
+                : getInitials(post.profile.first_name, post.profile.last_name);
               const avatarSrc = isOrgPost
                 ? orgLogo || undefined
                 : (post.profile.avatar || undefined);

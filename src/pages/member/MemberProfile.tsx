@@ -53,6 +53,7 @@ import { EditCertificationsDialog } from '@/components/member/EditCertifications
 import { ManageCertificationDialog } from '@/components/member/ManageCertificationDialog';
 import { MobileNavigation } from '@/components/layout/MobileNavigation';
 import { useUrlState } from '@/hooks/useUrlState';
+import { getInitials } from '@/lib/formatters';
 
 interface ProfileData {
   id: string;
@@ -1050,8 +1051,8 @@ export default function MemberProfile() {
     );
   }
 
-  const fullName = `${profile.first_name} ${profile.last_name}`;
-  const initials = `${profile.first_name[0]}${profile.last_name[0]}`;
+  const fullName = [profile.first_name, profile.last_name].filter(Boolean).join(' ');
+  const initials = getInitials(profile.first_name, profile.last_name);
 
   return (
     <div className="min-h-screen bg-background pb-20 md:pb-0">
@@ -1305,12 +1306,12 @@ export default function MemberProfile() {
                     <div className="flex items-start gap-3 mb-4">
                       <Avatar className="w-10 h-10 cursor-pointer">
                         <AvatarImage src={profile.avatar || undefined} />
-                        <AvatarFallback>{profile.first_name[0]}{profile.last_name[0]}</AvatarFallback>
+                        <AvatarFallback>{getInitials(profile.first_name, profile.last_name)}</AvatarFallback>
                       </Avatar>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between">
                           <div>
-                            <span className="font-semibold">{profile.first_name} {profile.last_name}</span>
+                            <span className="font-semibold">{[profile.first_name, profile.last_name].filter(Boolean).join(' ')}</span>
                             <p className="text-sm text-muted-foreground">
                               {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
                             </p>
@@ -1439,8 +1440,8 @@ export default function MemberProfile() {
               ) : (
                 savedPosts.map((post) => {
                   const author = post.author;
-                  const authorName = author ? `${author.first_name} ${author.last_name}` : 'Unknown User';
-                  const authorInitials = author ? `${author.first_name[0]}${author.last_name[0]}` : 'U';
+                  const authorName = author ? [author.first_name, author.last_name].filter(Boolean).join(' ') : 'Unknown User';
+                  const authorInitials = author ? getInitials(author.first_name, author.last_name) : 'U';
                   
                   return (
                     <Card key={post.id}>

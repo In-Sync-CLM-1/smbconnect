@@ -7,6 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
 import { Send, Trash2 } from 'lucide-react';
+import { getInitials } from '@/lib/formatters';
 
 interface Comment {
   id: string;
@@ -187,7 +188,7 @@ export function CommentsSection({ postId, currentUserId, onCommentAdded }: Comme
         <div className="space-y-4">
           {comments.map((comment) => {
             const fullName = `${comment.profile.first_name} ${comment.profile.last_name}`;
-            const initials = `${comment.profile.first_name[0] || ''}${comment.profile.last_name[0] || ''}`;
+            const initials = getInitials(comment.profile.first_name, comment.profile.last_name);
             const isOwnComment = comment.user_id === currentUserId;
 
             return (

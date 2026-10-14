@@ -9,6 +9,7 @@ import { ArrowLeft, Check, X, Users } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { MobileNavigation } from '@/components/layout/MobileNavigation';
 import { UrlTabs } from '@/components/UrlTabs';
+import { getInitials } from '@/lib/formatters';
 
 interface ConnectionWithDetails {
   id: string;
@@ -237,7 +238,7 @@ export default function MemberConnections() {
     // Use currentMemberId to determine the other person
     const otherPerson = conn.sender.id === currentMemberId ? conn.receiver : conn.sender;
     const fullName = `${otherPerson.profile.first_name} ${otherPerson.profile.last_name}`;
-    const initials = `${otherPerson.profile.first_name[0]}${otherPerson.profile.last_name[0]}`;
+    const initials = getInitials(otherPerson.profile.first_name, otherPerson.profile.last_name);
 
     return (
       <Card 

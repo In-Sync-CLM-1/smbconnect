@@ -124,3 +124,11 @@ export function getEmploymentStatusLabel(status: string | null): { label: string
   
   return statusMap[status] || { label: status, emoji: '' };
 }
+
+/**
+ * Avatar initials from a first/last name. Either part can be missing
+ * (members imported without a last name), so never index into it directly.
+ */
+export function getInitials(firstName?: string | null, lastName?: string | null): string {
+  return `${firstName?.[0] ?? ''}${lastName?.[0] ?? ''}`.toUpperCase();
+}

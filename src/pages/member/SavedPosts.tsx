@@ -13,6 +13,7 @@ import { SharePostDropdown } from '@/components/post/SharePostDropdown';
 import { BookmarkButton } from '@/components/post/BookmarkButton';
 import { MobileNavigation } from '@/components/layout/MobileNavigation';
 import { PostImageGrid, resolvePostImages } from '@/components/post/PostImageGrid';
+import { getInitials } from '@/lib/formatters';
 
 interface SavedPost {
   id: string;
@@ -209,7 +210,7 @@ export default function SavedPosts() {
             {savedPosts.map((savedPost) => {
               const { post, profile } = savedPost;
               const fullName = `${profile.first_name} ${profile.last_name}`;
-              const initials = `${profile.first_name[0] || '?'}${profile.last_name[0] || '?'}`;
+              const initials = getInitials(profile.first_name, profile.last_name) || '?';
 
               return (
                 <Card key={savedPost.id}>
