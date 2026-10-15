@@ -32,14 +32,12 @@ serve(async (req) => {
       }
     )
 
-    // Check if the user has a registered account (profile exists)
-    const { data: profile } = await supabaseAdmin
-      .from('profiles')
-      .select('id')
-      .ilike('email', email)
-      .maybeSingle()
+    // Check if the user has a registered account. Look it up through the sign-in
+    // records: profiles.email is empty for many accounts.
+    const { data: existing } = await supabaseAdmin.rpc('signup_lookup_user', { p_email: email })
+    const found = Array.isArray(existing) ? existing[0] : existing
 
-    if (!profile) {
+    if (!found?.id || !found.confirmed) {
       // Check if they have a pending invitation
       const { data: invitation } = await supabaseAdmin
         .from('member_invitations')
