@@ -89,13 +89,13 @@ serve(async (req) => {
 <p style="color:#666;font-size:13px;line-height:1.6;margin:0;">If you did not sign up, you can ignore this email.</p>
 </td></tr></table></td></tr></table></body></html>`
 
-    // Same sender as the rest of SMB's auth mail (notifications@in-sync.co.in), echocommunicator Resend account.
-    const apiKey = Deno.env.get('AUTH_RESEND_API_KEY') ?? Deno.env.get('RESEND_API_KEY')
+    // Every SMB Connect email is sent from the smbconnect.in domain through SMB's own Resend account.
+    const apiKey = Deno.env.get('RESEND_API_KEY')
     const resendResponse = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        from: 'In-Sync <notifications@in-sync.co.in>',
+        from: 'SMB Connect <noreply@smbconnect.in>',
         to: [email],
         subject: `${otp} is your SMB Connect verification code`,
         html,
