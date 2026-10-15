@@ -216,12 +216,6 @@ export default function JoinViaLink() {
               <span className="text-muted-foreground">Role</span>
               <Badge variant="outline" className="capitalize">{details.role}</Badge>
             </div>
-            {details.use_count > 0 && (
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Members joined</span>
-                <span className="font-medium">{details.use_count}</span>
-              </div>
-            )}
           </div>
 
           {user ? (
