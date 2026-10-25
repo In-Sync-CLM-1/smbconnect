@@ -7,7 +7,6 @@ import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { HomeButton } from "./components/HomeButton";
 import { RoleProvider } from "./contexts/RoleContext";
-import { HelpWidget } from "./components/HelpWidget";
 
 // Lazy load all pages for code splitting
 const Index = lazy(() => import("./pages/Index"));
@@ -143,7 +142,6 @@ const AppContent = () => {
   return (
     <>
       {!hideHomeButton && <HomeButton />}
-      <HelpWidget />
       <ErrorBoundary>
       <Suspense fallback={<PageLoader />}>
         <Routes>
